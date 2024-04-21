@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - TZ=${TZ}
+      - PGTZ=${TZ}
+    ports:
+      - '${POSTGRES_PORT_EXTERNAL}:5432'
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - bot-network
+
+  app:
+    build:
+      dockerfile: ./docker/app.dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./storage:/app/storage
+    networks:
+      - bot-network
+    depends_on:
+      - postgres
+    user: "${UID}:${GID}"
+    environment:
+      - TZ=${TZ}
+      - BOT_TOKEN=${BOT_TOKEN}
+      - DEFAULT_LOCALE=${DEFAULT_LOCALE}
+      - ADMIN_USER_ID=${ADMIN_USER_ID}
+
+volumes:
+  pgdata:
+
+networks:
+  bot-network:

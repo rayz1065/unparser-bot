@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "streetsidesoftware.code-spell-checker",
+    "dbaeumer.vscode-eslint",
+    "ms-azuretools.vscode-docker",
+    "prisma.prisma",
+    "esbenp.prettier-vscode",
+    "macabeus.vscode-fluent"
+  ]
+}

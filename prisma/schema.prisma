@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id    BigInt @id @default(autoincrement())
+  key   String @unique
+  value String
+}
+
+model User {
+  id                    Int      @id @default(autoincrement())
+  telegram_chat_id      BigInt   @unique
+  first_name            String
+  last_name             String?
+  username              String?
+  language              String?
+  is_personal_chat_open Boolean
+  created_at            DateTime @default(now())
+}
