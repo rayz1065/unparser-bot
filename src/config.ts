@@ -95,6 +95,7 @@ export const allowedUpdates: PollingOptions['allowed_updates'] = [
 
 export const pollingOptions: PollingOptions = {
   allowed_updates: allowedUpdates,
+  drop_pending_updates: process.env.env === 'production' ? false : true,
 };
 
 /**

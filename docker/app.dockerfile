@@ -14,10 +14,14 @@ COPY prisma prisma
 
 RUN npx prisma generate
 
+ENV env development
+
 CMD ["npm", "start"]
 
 FROM dev as prod
 
 COPY . .
+
+ENV env production
 
 CMD ["npx", "ts-node", "/app/src/bin/run.ts"]
