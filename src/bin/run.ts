@@ -1,9 +1,11 @@
 import { pollingOptions } from '../config';
-import { bot } from '../main';
+import { bot } from '../bot';
 import { prisma } from '../prisma';
+import { configureBot } from '../main';
 
 async function main() {
   console.log('Bot running...');
+  configureBot(bot);
   await bot.start(pollingOptions);
 }
 

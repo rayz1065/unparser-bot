@@ -11,7 +11,10 @@ export const i18n = new I18n<MyContext>({
     useIsolating: false,
   },
   localeNegotiator: (ctx) =>
-    ctx.dbUser?.language ?? ctx.from?.language_code ?? 'en',
+    ctx.dbUser?.language ??
+    ctx.from?.language_code ??
+    process.env.DEFAULT_LOCALE ??
+    'en',
   globalTranslationContext(ctx) {
     return {
       'user-name': escapeHtml(ctx.from?.first_name ?? ''),

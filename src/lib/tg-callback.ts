@@ -1,43 +1,53 @@
-import { Filter, Middleware } from 'grammy';
-import { MyContext } from '../types/grammy';
+import { Composer, Context, Filter, Middleware } from 'grammy';
 import { InlineKeyboardButton } from 'grammy/types';
 import { splitWithTail } from './utils';
 
-type CallbackMiddleware<T extends any[] = any[]> = Middleware<
-  Omit<Filter<MyContext, 'callback_query:data'>, 'callbackParams'> & {
+export type TgCallbackFlavor = {
+  callbackParams: unknown[];
+};
+
+type LocalContext = Context & TgCallbackFlavor;
+
+type CallbackMiddleware<
+  S extends LocalContext,
+  T extends unknown[],
+> = Middleware<
+  Omit<Filter<S, 'callback_query:data'>, 'callbackParams'> & {
     callbackParams: T;
   }
 >;
 
+type TgCallbackMatchResult<S extends LocalContext, T extends unknown[]> = {
+  match: TgCallback<S, T>;
+  values: T;
+} | null;
+
+interface TgCallbackMatchable<S extends LocalContext, T extends unknown[]> {
+  match(cbData: string): TgCallbackMatchResult<S, T>;
+}
+
 /**
- * creates a callback with a string prefix and some params
+ * creates a callback with a prefix and some params
  */
-export class TgCallback<T extends any[] = any[]> {
-  private prefix = 'tgb';
-  public middleware: CallbackMiddleware<T>[];
+export class TgCallback<S extends LocalContext, T extends unknown[] = never[]>
+  implements TgCallbackMatchable<S, T>
+{
+  public middleware: CallbackMiddleware<S, T>[];
 
   public constructor(
-    private name: string,
-    ...middleware: CallbackMiddleware<T>[]
+    private prefix: string,
+    ...middleware: CallbackMiddleware<S, T>[]
   ) {
-    if (this.name.indexOf('.') !== -1) {
-      throw new Error("TgCallback name may not contain '.'");
-    }
-    this.middleware = middleware;
-  }
-
-  public setPrefix(prefix: string) {
-    if (prefix.indexOf('.') !== -1) {
+    if (this.prefix.indexOf('.') !== -1) {
       throw new Error("TgCallback prefix may not contain '.'");
     }
-    this.prefix = prefix;
-    return this;
+    this.middleware = middleware;
   }
 
   public getCb(values: T) {
     let valuesStr = JSON.stringify(values);
     valuesStr = valuesStr.substring(1, valuesStr.length - 1);
-    return [this.prefix, this.name, valuesStr].join('.');
+    return this.prefix + '.' + valuesStr;
   }
 
   public getBtn(
@@ -50,68 +60,107 @@ export class TgCallback<T extends any[] = any[]> {
     };
   }
 
-  public match(prefix: string, name: string) {
-    return this.prefix === prefix && this.name === name;
-  }
-}
-
-export function cbValidate<T extends any[]>(
-  key: number,
-  validator: (value: string) => boolean
-): CallbackMiddleware<T> {
-  return async (ctx, next) => {
-    if (validator(`${ctx.callbackParams[key]}`)) {
-      return await next();
+  public match(cbData: string) {
+    const sections = splitWithTail(cbData, '.', 2);
+    if (sections.length !== 2) {
+      return null;
     }
-    await ctx.answerCallbackQuery(`Invalid value for ${key}`);
-  };
-}
 
-export function findTgCallback(
-  callbacks: TgCallback<any>[],
-  cbData: string
-): { match: TgCallback | null; values: any[] } {
-  const sections = splitWithTail(cbData, '.', 3);
-  if (sections.length !== 3) {
-    return { match: null, values: [] };
+    const [prefix, rest] = sections;
+    if (prefix !== this.prefix) {
+      return null;
+    }
+
+    let values: T;
+
+    try {
+      values = JSON.parse('[' + rest + ']');
+    } catch (error) {
+      return null;
+    }
+
+    return { match: this, values };
   }
-
-  const [prefix, name, valuesStr] = sections;
-  let values: any;
-  try {
-    values = JSON.parse(`[${valuesStr}]`);
-  } catch (error) {
-    return { match: null, values: [] };
-  }
-
-  const match = callbacks.find((callback) => callback.match(prefix, name));
-  return { match: match ?? null, values };
 }
 
 /**
- * Usage:
- *
- * module
- *   .on('callback_query:data')
- *   .lazy(
- *     tgLazyCallbackMiddleware(
- *       [fooCb, barCb].map((x) =>
- *         x.setPrefix('foobar')
- *       )
- *     )
- *   );
+ * A composer dedicated to storing multiple instances of TgCallback.
+ * The composer will automatically register any created TgCallback.
  */
-export function tgLazyCallbackMiddleware(callbacks: TgCallback<any>[]) {
-  return (ctx: MyContext) => {
-    const { match, values } = findTgCallback(
-      callbacks,
-      ctx.callbackQuery?.data ?? ''
-    );
-    if (!match) {
+export class TgCallbackComposer<S extends LocalContext>
+  extends Composer<S>
+  implements TgCallbackMatchable<S, unknown[]>
+{
+  private callbacks: TgCallback<S, any>[] = [];
+
+  public constructor(
+    private prefix: string,
+    ...middleware: Middleware<S>[]
+  ) {
+    super(...middleware);
+
+    if (this.prefix.indexOf('.') !== -1) {
+      throw new Error("TgCallbackComposer prefix may not contain '.'");
+    }
+
+    super.on('callback_query:data').lazy(this.lazyMatchCallback.bind(this));
+  }
+
+  public match(cbData: string) {
+    const sections = splitWithTail(cbData, '.', 2);
+    if (sections.length !== 2) {
+      return null;
+    }
+
+    const [prefix, rest] = sections;
+    if (prefix !== this.prefix) {
+      return null;
+    }
+
+    for (const callback of this.callbacks) {
+      const result = callback.match(rest);
+      if (result) {
+        return result;
+      }
+    }
+
+    return null;
+  }
+
+  private lazyMatchCallback(ctx: S) {
+    const cbData = ctx.callbackQuery?.data ?? '';
+    const result = this.match(cbData);
+
+    if (!result) {
       return [];
     }
 
+    const { match, values } = result;
+
     ctx.callbackParams = values;
     return match.middleware;
-  };
+  }
+
+  /**
+   * Creates, stores, and returns a TgCallback.
+   * The created TgCallback will be edited so that getCb contains the prefix,
+   * of this composer in addition, this way we can route the requests properly.
+   */
+  public makeCallback<T extends unknown[] = never[]>(
+    prefix: string,
+    ...middleware: CallbackMiddleware<S, T>[]
+  ) {
+    const callback = new TgCallback<S, T>(prefix, ...middleware);
+
+    const oldGetCb = callback.getCb.bind(callback);
+    callback.getCb = (values: T) => this.prefix + '.' + oldGetCb(values);
+
+    this.callbacks.push(callback);
+
+    return callback;
+  }
+
+  public setPrefix(prefix: string) {
+    this.prefix = prefix;
+  }
 }

@@ -1,11 +1,21 @@
 import { InlineKeyboardButton, Message } from 'grammy/types';
-import { MyContext, MyConversation } from '../types/grammy';
+import { Context } from 'grammy';
+import { Conversation } from '@grammyjs/conversations';
+
+export type ConversationUtilsFlavor = {
+  conversationData?: {
+    messageId?: number;
+  } & Record<string, any>;
+};
+
+type LocalContext = Context & ConversationUtilsFlavor;
+type LocalConversation = Conversation<LocalContext>;
 
 /**
  * tries deleting the a message, on failure clears the message id
  * so that a new message can be sent
  */
-export async function conversationDelete(ctx: MyContext, messageId: number) {
+export async function conversationDelete(ctx: LocalContext, messageId: number) {
   if (!ctx.chat || !ctx.conversationData) {
     throw new Error('Conversation edit does not have relevant data');
   }
@@ -19,8 +29,8 @@ export async function conversationDelete(ctx: MyContext, messageId: number) {
 }
 
 export async function conversationEdit(
-  ctx: MyContext,
-  ...args: Parameters<MyContext['editMessageText']>
+  ctx: LocalContext,
+  ...args: Parameters<LocalContext['editMessageText']>
 ) {
   if (!ctx.chat || !ctx.conversationData) {
     throw new Error('Conversation edit does not have relevant data');
@@ -39,7 +49,7 @@ export async function conversationEdit(
 }
 
 export async function skipCommands(
-  conversation: MyConversation,
+  conversation: LocalConversation,
   message?: Message
 ) {
   if (message?.text && message.text.startsWith('/')) {
@@ -50,8 +60,8 @@ export async function skipCommands(
 type MaybePromise<T> = Promise<T> | T;
 
 export async function tgValidate(
-  conversation: MyConversation,
-  ctx: MyContext,
+  conversation: LocalConversation,
+  ctx: LocalContext,
   validator: () => MaybePromise<string | undefined>,
   options?: {
     getMessage?: (error: string) => {

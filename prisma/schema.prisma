@@ -17,12 +17,34 @@ model Session {
 }
 
 model User {
-  id                    Int      @id @default(autoincrement())
-  telegram_chat_id      BigInt   @unique
-  first_name            String
-  last_name             String?
-  username              String?
-  language              String?
+  id Int @id @default(autoincrement())
+
+  // received from telegram
+  is_bot                   Boolean
+  telegram_chat_id         BigInt  @unique
+  telegram_language_code   String?
+  is_premium               Boolean
+  added_to_attachment_menu Boolean
+
+  // computed
   is_personal_chat_open Boolean
+  language              String
   created_at            DateTime @default(now())
+
+  // includes first_name, last_name, username
+  telegram_chat TelegramChat @relation(fields: [telegram_chat_id], references: [id])
+}
+
+model TelegramChat {
+  id         BigInt   @id @default(autoincrement())
+  type       String
+  title      String?
+  username   String?
+  first_name String?
+  last_name  String?
+  is_forum   Boolean?
+
+  created_at DateTime @default(now())
+
+  user User?
 }

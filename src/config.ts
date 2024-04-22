@@ -41,7 +41,7 @@ export const channelDefaultAdministratorRights: ChatAdministratorRights = {
   is_anonymous: false,
   can_edit_messages: true,
   can_post_messages: true,
-};
+} as const;
 
 export const worksInGroups = false;
 export const groupDefaultAdministratorRights: ChatAdministratorRights = {
@@ -58,7 +58,7 @@ export const groupDefaultAdministratorRights: ChatAdministratorRights = {
   is_anonymous: false,
   can_manage_topics: false,
   can_pin_messages: false,
-};
+} as const;
 
 /**
  * List of allowed updates
@@ -95,7 +95,6 @@ export const allowedUpdates: PollingOptions['allowed_updates'] = [
 
 export const pollingOptions: PollingOptions = {
   allowed_updates: allowedUpdates,
-  drop_pending_updates: process.env.env === 'production' ? false : true,
 };
 
 /**
@@ -110,3 +109,10 @@ export function setupGuideManualSteps() {
     'Turn inline feedback to 100%',
   ];
 }
+
+export const botProperties = {
+  can_join_groups: worksInGroups,
+  can_read_all_group_messages: false,
+  supports_inline_queries: true,
+  can_connect_to_business: false,
+} as const;

@@ -1,27 +1,26 @@
-import { Middleware } from 'grammy';
-import { MyContext } from '../types/grammy';
-import { TranslationVariables } from '@grammyjs/i18n';
+import { Context, Middleware } from 'grammy';
+import { I18nFlavor, TranslationVariables } from '@grammyjs/i18n';
 
 /**
  * An error to be displayed to the user
  */
 export class TgError extends Error {
-  public context?: TranslationVariables;
+  public variables?: TranslationVariables;
 
   public constructor(
     message: string,
-    context?: TranslationVariables | undefined
+    variables?: TranslationVariables | undefined
   ) {
     super(message);
-    this.context = context;
+    this.variables = variables;
   }
 }
 
 export async function defaultCatchTgErrorsHandler(
-  ctx: MyContext,
+  ctx: Context & I18nFlavor,
   error: TgError
 ) {
-  const prettyError = ctx.t(error.message, error.context);
+  const prettyError = ctx.t(error.message, error.variables);
 
   try {
     if (ctx.callbackQuery) {
@@ -36,17 +35,17 @@ export async function defaultCatchTgErrorsHandler(
   }
 }
 
-export interface CatchTgErrorsOptions {
+export interface CatchTgErrorsOptions<T extends Context> {
   customHandler: (
-    ctx: MyContext,
+    ctx: T,
     error: TgError,
-    options: CatchTgErrorsOptions | undefined
+    options: CatchTgErrorsOptions<T> | undefined
   ) => void;
 }
 
-export const catchTgErrors: (
-  options?: CatchTgErrorsOptions
-) => Middleware<MyContext> = (options) => async (ctx, next) => {
+export const catchTgErrors: <T extends Context & I18nFlavor>(
+  options?: CatchTgErrorsOptions<T>
+) => Middleware<T> = (options) => async (ctx, next) => {
   try {
     await next();
   } catch (error) {
@@ -55,6 +54,6 @@ export const catchTgErrors: (
     }
 
     const handler = options?.customHandler ?? defaultCatchTgErrorsHandler;
-    handler(ctx, error, options);
+    await handler(ctx, error, options);
   }
 };

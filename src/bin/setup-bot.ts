@@ -2,8 +2,9 @@
  * Utility script to perform the bot setup, run with --help for usage
  */
 import { Option, program } from 'commander';
-import { bot } from '../main';
+import { bot } from '../bot';
 import {
+  botProperties,
   channelDefaultAdministratorRights,
   groupDefaultAdministratorRights,
   myCommands,
@@ -156,6 +157,29 @@ function furtherSetup() {
   );
 }
 
+async function checkBotProperties() {
+  console.log('Checking bot properties...');
+  const me = await bot.api.getMe();
+
+  let fail = false;
+
+  for (const key_ in botProperties) {
+    const key = key_ as keyof typeof botProperties;
+    const expected = botProperties[key];
+    const found = me[key];
+    if (found !== expected) {
+      fail = true;
+      console.warn(`${key} is set incorrectly`, { found, expected });
+    }
+  }
+
+  if (!fail) {
+    console.log('All properties are set correctly');
+  } else {
+    console.warn('Please fix the properties through @BotFather');
+  }
+}
+
 async function main() {
   if (
     !options.name &&
@@ -194,6 +218,8 @@ async function main() {
 
   console.log();
   console.log(furtherSetup());
+
+  await checkBotProperties();
 }
 
 void main();
