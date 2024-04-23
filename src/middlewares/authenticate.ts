@@ -50,8 +50,17 @@ export async function getUserFromUpdate(ctx: Context) {
       language:
         updateData.telegram_language_code ?? process.env.DEFAULT_LOCALE ?? 'en',
       telegram_chat: {
-        connect: {
-          id: from.id,
+        connectOrCreate: {
+          where: { id: from.id },
+          create: {
+            id: from.id,
+            type: 'private',
+            first_name: from.first_name,
+            last_name: from.last_name,
+            username: from.username,
+            is_forum: null,
+            title: null,
+          },
         },
       },
     };
