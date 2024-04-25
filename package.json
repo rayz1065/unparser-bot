@@ -1,5 +1,6 @@
 {
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "start": "nodemon --watch src/ --ext ts,json,ftl src/bin/run.ts",
     "build": "npx tsc"
