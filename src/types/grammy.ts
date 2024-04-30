@@ -6,10 +6,13 @@ import { StoredChatFlavor } from '../middlewares/store-telegram-chat';
 import { AuthenticatedFlavor } from '../middlewares/authenticate';
 import { ConversationUtilsFlavor } from '../lib/conversations-utils';
 import { TgCallbackFlavor } from '../lib/tg-callback';
+import { TgComponentsFlavor } from '../lib/components/tg-components-middleware';
 
 export type MySessionData = Record<string, never>;
 
-export type MyBaseContext = ParseModeFlavor<ConversationFlavor<Context>> &
+export type MyBaseContext = TgComponentsFlavor<
+  ParseModeFlavor<ConversationFlavor<Context>>
+> &
   SessionFlavor<MySessionData> &
   I18nFlavor &
   ConversationUtilsFlavor &
