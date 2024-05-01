@@ -19,6 +19,8 @@ type StateSetter = (
   permanent?: boolean
 ) => void;
 
+type StateUnsetter = (componentKey: ComponentKey) => void;
+
 export type TgComponentsSessionData = {
   components?: Record<ComponentKey, TgComponentMetaState<any>>;
 };
@@ -27,6 +29,7 @@ export type TgComponentsFlavor<C extends Context | undefined = undefined> = {
   components: {
     get: StateGetter;
     set: StateSetter;
+    unset: StateUnsetter;
   };
 } & (C extends Context
   ? C & SessionFlavor<TgComponentsSessionData>
@@ -51,6 +54,9 @@ export const tgComponentsMiddleware: <C extends Context>(
           permanent,
           state,
         };
+      },
+      unset: (componentKey) => {
+        delete ctx.session.components?.[componentKey];
       },
     };
     await next();

@@ -1,6 +1,12 @@
 import { Context } from 'grammy';
 import { InlineKeyboardButton } from 'grammy/types';
-import { MaybePromise } from './maybe-callable';
+import {
+  MaybeCallable,
+  MaybeCalled,
+  MaybePromise,
+  maybeCall,
+} from './maybe-callable';
+import { stringifyHash } from './stringify-hash';
 
 type Other<C extends Context> = Parameters<C['api']['sendMessage']>[2];
 
@@ -8,6 +14,11 @@ export type GetPropsType<T extends TgComponent<any, any, any>> =
   T extends TgComponent<any, infer P, any> ? P : never;
 export type GetStateType<T extends TgComponent<any, any, any>> =
   T extends TgComponent<infer S, any, any> ? S : never;
+
+export type MaybeLazyProperty<T, Props, State> = MaybeCallable<
+  T,
+  [Props, State]
+>;
 
 export interface TgMessage<C extends Context = Context> {
   text: string;
@@ -51,6 +62,19 @@ export abstract class TgComponent<
 > {
   protected handlers: { [key: string]: (...args: any[]) => void } = {};
   protected children: Record<string, TgComponent<any, any, C>> = {};
+
+  /**
+   * Cache for lazily-loaded props.
+   */
+  private propsCache: Partial<{
+    [K in keyof Props]: MaybeCalled<K>;
+  }> = {};
+
+  /**
+   * The state for which the props cache is valid (JSON encoded).
+   * If the state changes, the props have to be recomputed.
+   */
+  private propsCacheState = '';
 
   constructor(public props: Props) {}
 
@@ -176,18 +200,52 @@ export abstract class TgComponent<
     return this.addChild(
       key,
       new ctor({
-        getState: () => this.getState()[key],
-        setState: (state) => {
-          // using patchState here leads to an error
-          this.setState({
-            ...this.getState(),
-            [key]: state,
-          });
-        },
-        getButton: (text, handler, ...args) =>
-          this.getButton(text, `${key}.${handler}`, ...args),
+        ...this.getDefaultProps(key),
         ...props,
       } as PropsArg)
     );
+  }
+
+  /**
+   * Creates all the default props for the given key.
+   * This can be used in cases makeChild does not cover.
+   */
+  public getDefaultProps<K extends keyof State & string>(
+    key: K
+  ): TgDefaultProps<State[K]> {
+    return {
+      getState: () => this.getState()[key],
+      setState: (state) => {
+        // using patchState here leads to an error
+        this.setState({
+          ...this.getState(),
+          [key]: state,
+        });
+      },
+      getButton: (text, handler, ...args) =>
+        this.getButton(text, `${key}.${handler}`, ...args),
+    };
+  }
+
+  /**
+   * Get the value of a lazy loaded property, the value is also cached
+   */
+  public async getProperty<K extends keyof Props & string>(
+    key: K
+  ): Promise<MaybeCalled<Props[K]>> {
+    const stateStr = stringifyHash(this.getState());
+    if (this.propsCacheState !== stateStr) {
+      this.propsCacheState = stateStr;
+      this.propsCache = {};
+    }
+
+    const cached = this.propsCache[key];
+    if (cached) {
+      return cached;
+    }
+
+    const prop = await maybeCall(this.props[key], this.props, this.getState());
+    this.propsCache[key] = prop;
+    return prop;
   }
 }

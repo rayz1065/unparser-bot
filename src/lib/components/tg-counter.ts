@@ -1,24 +1,26 @@
 import { InlineKeyboardButton } from 'grammy/types';
-import { TgComponent, TgDefaultProps } from './tg-components';
+import {
+  MaybeLazyProperty,
+  TgComponent,
+  TgDefaultProps,
+} from './tg-components';
 import { Context } from 'grammy';
-import { MaybeCallable, MaybePromise, maybeCall } from './maybe-callable';
+import { MaybePromise } from './maybe-callable';
 
 interface State {
   value: number;
 }
 
 interface OptionalProps {
-  inlineLabelPosition: MaybeCallable<
+  inlineLabelPosition: MaybeLazyProperty<
     'left' | 'center' | 'right' | 'none',
-    [props: Props, state: State]
+    Props,
+    State
   >;
-  inlineLabelPrinter: (props: Props, state: State) => string;
-  textPrinter: (props: Props, state: State) => string;
+  inlineLabelPrinter: (props: Props, state: State) => MaybePromise<string>;
+  textPrinter: (props: Props, state: State) => MaybePromise<string>;
   ctx: null | Context;
-  options: MaybeCallable<
-    { delta: number; label: string }[],
-    [props: Props, state: State]
-  >;
+  options: MaybeLazyProperty<{ delta: number; label: string }[], Props, State>;
 
   onInlineLabelClick:
     | null
@@ -49,6 +51,7 @@ export const tgCounterDefaultProps = {
  * to change this behavior you can over pass an onInlineLabelClick handler.
  * Example:
  *
+ * ```ts
  * this.counter = this.makeChild('c', TgCounter, {
  *   label: 'counter',
  *   inlineLabelPosition: 'left',
@@ -56,6 +59,7 @@ export const tgCounterDefaultProps = {
  *     props.setState({ value: 0 });
  *   },
  * });
+ * ```
  */
 export class TgCounter extends TgComponent<State, Props> {
   protected handlers = {
@@ -86,19 +90,18 @@ export class TgCounter extends TgComponent<State, Props> {
 
     if (this.props.ctx) {
       await this.props.ctx.answerCallbackQuery(
-        this.props.inlineLabelPrinter(this.props, this.getState())
+        await this.props.inlineLabelPrinter(this.props, this.getState())
       );
     }
   }
 
   public async render() {
     const props = this.props;
-    let { textPrinter, inlineLabelPosition, inlineLabelPrinter, options } =
-      props;
+    const { textPrinter, inlineLabelPrinter } = props;
     const state = this.getState();
 
-    options = await maybeCall(options, props, state);
-    inlineLabelPosition = await maybeCall(inlineLabelPosition, props, state);
+    const options = await this.getProperty('options');
+    const inlineLabelPosition = await this.getProperty('inlineLabelPosition');
 
     const inlineLabelIdx = {
       center: Math.round(options.length / 2),
@@ -109,7 +112,7 @@ export class TgCounter extends TgComponent<State, Props> {
 
     const buttons: InlineKeyboardButton[] = [];
     const inlineLabel = this.getButton(
-      inlineLabelPrinter(this.props, state),
+      await inlineLabelPrinter(this.props, state),
       'n'
     );
 
@@ -124,7 +127,7 @@ export class TgCounter extends TgComponent<State, Props> {
     }
 
     return {
-      text: textPrinter(this.props, state),
+      text: await textPrinter(this.props, state),
       keyboard: [buttons],
     };
   }
