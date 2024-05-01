@@ -1,5 +1,5 @@
 import { Context } from 'grammy';
-import { MaybePromise, maybeCall } from './maybe-callable';
+import { MaybePromise } from './maybe-callable';
 import { tgButtonsGrid } from './tg-buttons-grid';
 import {
   GetStateType,
@@ -11,9 +11,14 @@ import {
 import { TgCounter } from './tg-counter';
 import { InlineKeyboardButton } from 'grammy/types';
 
+type PageInfo = {
+  page: number;
+  skip: number;
+  perPage: number;
+};
 type PageRenderer<T> = (
-  props: Props<T>,
-  state: State
+  elements: T[],
+  pageInfo: PageInfo
 ) => MaybePromise<TgMessage>;
 
 type OptionalProps<T> = {
@@ -27,15 +32,7 @@ type OptionalProps<T> = {
 
 type RequiredProps<T> = {
   renderPage: PageRenderer<T>;
-  loadPage: ({
-    page,
-    skip,
-    perPage,
-  }: {
-    page: number;
-    skip: number;
-    perPage: number;
-  }) => MaybePromise<T[]>;
+  loadPage: (pageInfo: PageInfo) => MaybePromise<T[]>;
   total: MaybeLazyProperty<number, Props<T>, State>;
 } & TgDefaultProps<State>;
 
@@ -68,15 +65,9 @@ export function renderAsButtonsGrid<T>({
     text?: string;
   };
 }): PageRenderer<T> {
-  return async (props: Props<T>, state: State) => {
-    const perPage = await maybeCall(props.perPage, props, state);
-    const page = await props.loadPage({
-      page: state.c.value,
-      skip: state.c.value * perPage,
-      perPage,
-    });
+  return async (elements: T[]) => {
     const items = await Promise.all(
-      page.map(async (element) => renderElement(element))
+      elements.map(async (element) => renderElement(element))
     );
 
     return {
@@ -206,7 +197,16 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
   public async render(): Promise<TgMessage> {
     const { renderPage } = this.props;
     const counter = await this.counter.render();
-    const page = await renderPage(this.props, this.getState());
+    const pageIndex = this.getState().c.value;
+    const perPage = await this.getProperty('perPage');
+    const pageInfo: PageInfo = {
+      page: pageIndex,
+      skip: pageIndex * perPage,
+      perPage: perPage,
+    };
+
+    const elements = await this.props.loadPage(pageInfo);
+    const page = await renderPage(elements, pageInfo);
 
     return {
       text: page.text,
