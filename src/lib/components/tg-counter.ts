@@ -17,17 +17,19 @@ interface OptionalProps {
     Props,
     State
   >;
-  inlineLabelPrinter: (props: Props, state: State) => MaybePromise<string>;
-  textPrinter: (props: Props, state: State) => MaybePromise<string>;
+  inlineLabelPrinter: (
+    props: Omit<Props, 'label'> & { label: string },
+    state: State
+  ) => MaybePromise<string>;
+  textPrinter: (
+    props: Omit<Props, 'label'> & { label: string },
+    state: State
+  ) => MaybePromise<string>;
   ctx: null | Context;
   options: MaybeLazyProperty<{ delta: number; label: string }[], Props, State>;
-
-  onInlineLabelClick:
-    | null
-    | ((props: Props, state: State) => MaybePromise<void>);
 }
 type RequiredProps = TgDefaultProps<State> & {
-  label: string;
+  label: MaybeLazyProperty<string, Props, State>;
 };
 
 type Props = RequiredProps & OptionalProps;
@@ -41,30 +43,33 @@ export const tgCounterDefaultProps = {
     { delta: 1, label: '➖' },
     { delta: -1, label: '➕' },
   ],
-  onInlineLabelClick: null,
 } as const satisfies OptionalProps;
 
 /**
  * A simple counter component, you can pass in custom options and pick the
  * position of the label (or if you prefer to remove the label).
- * When the label is clicked the text of the label is displayed, if you prefer
- * to change this behavior you can over pass an onInlineLabelClick handler.
+ * When the label is clicked the text of the label is displayed, you can
+ * override the `inlineLabelClicked` handler if you want to change this.
+ *
  * Example:
  *
  * ```ts
  * this.counter = this.makeChild('c', TgCounter, {
  *   label: 'counter',
  *   inlineLabelPosition: 'left',
- *   onInlineLabelClick: (props) => {
- *     props.setState({ value: 0 });
- *   },
  * });
  * ```
  */
 export class TgCounter extends TgComponent<State, Props> {
-  protected handlers = {
-    a: this.add.bind(this),
-    n: this.noop.bind(this),
+  handlers = {
+    add: {
+      permanentId: 'a',
+      handler: this.add.bind(this),
+    },
+    inlineLabelClicked: {
+      permanentId: 'n',
+      handler: this.inlineLabelClicked.bind(this),
+    },
   };
 
   public constructor(props: Partial<OptionalProps> & RequiredProps) {
@@ -83,14 +88,14 @@ export class TgCounter extends TgComponent<State, Props> {
     });
   }
 
-  public async noop() {
-    if (this.props.onInlineLabelClick) {
-      return await this.props.onInlineLabelClick(this.props, this.getState());
-    }
-
+  public async inlineLabelClicked() {
+    const label = await this.getProperty('label');
     if (this.props.ctx) {
       await this.props.ctx.answerCallbackQuery(
-        await this.props.inlineLabelPrinter(this.props, this.getState())
+        await this.props.inlineLabelPrinter(
+          { ...this.props, label },
+          this.getState()
+        )
       );
     }
   }
@@ -102,6 +107,7 @@ export class TgCounter extends TgComponent<State, Props> {
 
     const options = await this.getProperty('options');
     const inlineLabelPosition = await this.getProperty('inlineLabelPosition');
+    const label = await this.getProperty('label');
 
     const inlineLabelIdx = {
       center: Math.round(options.length / 2),
@@ -112,8 +118,8 @@ export class TgCounter extends TgComponent<State, Props> {
 
     const buttons: InlineKeyboardButton[] = [];
     const inlineLabel = this.getButton(
-      await inlineLabelPrinter(this.props, state),
-      'n'
+      await inlineLabelPrinter({ ...this.props, label }, state),
+      this.handlers.inlineLabelClicked
     );
 
     for (let idx = 0; idx <= options.length; idx++) {
@@ -122,12 +128,12 @@ export class TgCounter extends TgComponent<State, Props> {
       }
       if (idx < options.length) {
         const { delta, label } = options[idx];
-        buttons.push(this.getButton(label, 'a', delta));
+        buttons.push(this.getButton(label, this.handlers.add, delta));
       }
     }
 
     return {
-      text: await textPrinter(this.props, state),
+      text: await textPrinter({ ...this.props, label }, state),
       keyboard: [buttons],
     };
   }

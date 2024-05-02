@@ -2,6 +2,7 @@ import { pollingOptions } from '../config';
 import { bot } from '../bot';
 import { prisma } from '../prisma';
 import { configureBot } from '../main';
+import '../dayjs';
 
 async function main() {
   console.log('Bot running...');

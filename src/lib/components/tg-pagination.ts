@@ -24,7 +24,6 @@ type PageRenderer<T> = (
 type OptionalProps<T> = {
   perPage: MaybeLazyProperty<number, Props<T>, State>;
   ctx: Context | null;
-  handleOutOfBounds: ((props: Props<T>, state: State) => Promise<void>) | null;
   outOfBoundsLabel: MaybeLazyProperty<string, Props<T>, State>;
   previousPageLabel: MaybeLazyProperty<string, Props<T>, State>;
   nextPageLabel: MaybeLazyProperty<string, Props<T>, State>;
@@ -45,7 +44,6 @@ type State = {
 export const tgPaginationDefaultProps = {
   perPage: 30,
   ctx: null,
-  handleOutOfBounds: null,
   outOfBoundsLabel: '🚫',
   previousPageLabel: '⬅️',
   nextPageLabel: '➡️',
@@ -117,7 +115,12 @@ export function renderAsButtonsGrid<T>({
  */
 export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
   public counter: TgCounter;
-  handlers = {};
+  handlers = {
+    onOutOfBounds: {
+      permanentId: 'o',
+      handler: this.onOutOfBounds.bind(this),
+    },
+  };
 
   constructor(props: RequiredProps<T> & Partial<OptionalProps<T>>) {
     super({ ...tgPaginationDefaultProps, ...props });
@@ -159,31 +162,31 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
             maxPage + 1
           }`;
         },
-        setState: async (counterState) => {
-          // override setState function to avoid going out of bounds
-          const perPage = await this.getProperty('perPage');
-          const total = await this.getProperty('total');
-          const maxPage = Math.ceil(total / Math.max(perPage, 1)) - 1;
-
-          if (counterState.value < 0 || counterState.value > maxPage) {
-            counterState.value = Math.max(
-              0,
-              Math.min(counterState.value, maxPage)
-            );
-            await this.handleOutOfBounds();
-          }
-
-          this.patchState({ c: counterState });
-        },
       })
     );
+
+    this.counter.overrideHandler(this.counter.handlers.add, async (delta) => {
+      // override setState function to avoid going out of bounds
+      const perPage = await this.getProperty('perPage');
+      const total = await this.getProperty('total');
+      const maxPage = Math.ceil(total / Math.max(perPage, 1)) - 1;
+
+      const state = this.getState();
+      let page = state.c.value + delta;
+
+      if (page < 0 || page > maxPage) {
+        page = Math.max(0, Math.min(page, maxPage));
+        await this.handle(this.handlers.onOutOfBounds);
+      }
+
+      this.counter.patchState({ value: page });
+    });
   }
 
-  public async handleOutOfBounds() {
-    if (this.props.handleOutOfBounds) {
-      return this.props.handleOutOfBounds(this.props, this.getState());
-    }
-
+  /**
+   * Called when moving to a page that negative or larger than the maximum.
+   */
+  public async onOutOfBounds() {
     if (this.props.ctx) {
       const outOfBoundsLabel = await this.getProperty('outOfBoundsLabel');
       await this.props.ctx.answerCallbackQuery(outOfBoundsLabel);

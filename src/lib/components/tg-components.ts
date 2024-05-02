@@ -45,6 +45,14 @@ export type TgDefaultProps<State extends TgStateBase> = {
   setState: TgStateSetter<State>;
 };
 
+type HandlerFunction<T extends any[] = any[]> = (
+  ...args: T
+) => MaybePromise<void>;
+type HandlerData<T extends any[] = any[]> = {
+  permanentId: string;
+  handler: HandlerFunction<T>;
+};
+
 type TgPropsBase<State extends TgStateBase> = Record<string, any> &
   TgDefaultProps<State>;
 
@@ -60,14 +68,14 @@ export abstract class TgComponent<
   Props extends TgPropsBase<State> = TgPropsBase<State>,
   C extends Context = Context,
 > {
-  protected handlers: { [key: string]: (...args: any[]) => void } = {};
+  public handlers: { [key: string]: HandlerData } = {};
   protected children: Record<string, TgComponent<any, any, C>> = {};
 
   /**
    * Cache for lazily-loaded props.
    */
   private propsCache: Partial<{
-    [K in keyof Props]: MaybeCalled<K>;
+    [K in keyof Props]: MaybeCalled<Props[K]>;
   }> = {};
 
   /**
@@ -89,14 +97,6 @@ export abstract class TgComponent<
         child.getDefaultState(),
       ])
     );
-  }
-
-  /**
-   * Returns a button with the specified text for the handler.
-   * When the button is pressed, the handler will be invoked.
-   */
-  public getButton(text: string, handler: string, ...args: any[]) {
-    return this.props.getButton(text, handler, ...args);
   }
 
   /**
@@ -129,22 +129,99 @@ export abstract class TgComponent<
   }
 
   /**
-   * Calls a handler after ensuring it exists.
+   * Finds the handler indicated by the permanentId, returns null on failure.
    */
-  public handle(handlerName: string, ...args: any[]) {
-    if (!this.hasHandler(handlerName)) {
-      throw Error(`No handler with name ${handlerName} found`);
+  public findHandler(permanentId: string) {
+    for (const key in this.handlers) {
+      if (this.handlers[key].permanentId === permanentId) {
+        return this.handlers[key];
+      }
     }
 
-    this.handlers[handlerName](...args);
+    return null;
   }
 
-  public hasHandler(action: string): boolean {
-    return action in this.handlers;
+  /**
+   * Returns a button with the specified text for the handler.
+   * When the button is pressed, the handler will be invoked.
+   */
+  public getButton<T extends any[]>(
+    text: string,
+    permanentId: string | HandlerData<T>,
+    ...args: T
+  ) {
+    permanentId =
+      typeof permanentId === 'string' ? permanentId : permanentId.permanentId;
+
+    return this.props.getButton(text, permanentId, ...args);
   }
 
-  public getHandlers() {
-    return this.handlers;
+  /**
+   * Register a new handler that can be used for routing calls.
+   * The permanentId is used in routing, it should be 1 or 2 characters and
+   * must be unique. The permanentId cannot be changed after deploying the
+   * component to avoid breaking stale UIs.
+   *
+   * **IMPORTANT**: make sure the handler is properly bound to the right object
+   * if it needs to access `this`.
+   */
+  public registerHandler(permanentId: string, handler: HandlerFunction) {
+    const handlerKey = `.${permanentId}`;
+
+    if (handlerKey in this.handlers) {
+      throw Error(`Trying to handler key ${handlerKey} already exists`);
+    }
+    if (this.findHandler(permanentId)) {
+      throw Error(`Trying to register handler ${permanentId} already exists`);
+    }
+
+    this.handlers[handlerKey] = { permanentId, handler };
+  }
+
+  /**
+   * Overrides an existing handler with a new one.
+   *
+   * **IMPORTANT**: make sure the handler is properly bound to the right object
+   * if it needs to access `this` (or use an arrow function to capture the
+   * local `this`).
+   */
+  public overrideHandler<T extends any[] = any[]>(
+    permanentId: string | HandlerData<T>,
+    newHandler: HandlerFunction<T>
+  ) {
+    permanentId =
+      typeof permanentId === 'string' ? permanentId : permanentId.permanentId;
+
+    const handler = this.findHandler(permanentId);
+    if (!handler) {
+      throw Error(`Trying to override ${permanentId} but it does not exist`);
+    }
+
+    (handler as HandlerData<T>).handler = newHandler;
+  }
+
+  /**
+   * Calls a handler after ensuring it exists.
+   * Note that the actual handler called may not be the one you passed, in case
+   * it has been overridden.
+   */
+  public async handle<T extends any[] = any[]>(
+    permanentId: string | HandlerData<T>,
+    ...args: T
+  ) {
+    permanentId =
+      typeof permanentId === 'string' ? permanentId : permanentId.permanentId;
+
+    const handler = this.findHandler(permanentId);
+    if (!handler) {
+      throw Error(`Handler ${permanentId} not found`);
+    }
+
+    await handler.handler(...args);
+  }
+
+  public hasHandler(permanentId: string) {
+    return this.findHandler(permanentId) !== null;
   }
 
   /**
@@ -163,17 +240,14 @@ export abstract class TgComponent<
 
     this.children[key] = child;
 
-    for (const handlerKey in child.getHandlers()) {
-      const newHandlerKey = `${key}.${handlerKey}`;
+    const childHandlers = child.handlers;
+    for (const handlerKey in childHandlers) {
+      const childPermanentId = childHandlers[handlerKey].permanentId;
+      const newHandlerKey = `${key}.${childPermanentId}`;
 
-      if (this.handlers[newHandlerKey]) {
-        throw Error(
-          `Trying to register ${key} but handler ${newHandlerKey} already exists`
-        );
-      }
-
-      this.handlers[newHandlerKey] = (...args: any[]) =>
-        this.children[key].handle(handlerKey, ...args);
+      this.registerHandler(newHandlerKey, async (...args: any[]) => {
+        await this.children[key].handle(childPermanentId, ...args);
+      });
     }
 
     return child;
@@ -223,7 +297,7 @@ export abstract class TgComponent<
         });
       },
       getButton: (text, handler, ...args) =>
-        this.getButton(text, `${key}.${handler}`, ...args),
+        this.props.getButton(text, `${key}.${handler}`, ...args),
     };
   }
 
