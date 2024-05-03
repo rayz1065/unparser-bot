@@ -40,8 +40,8 @@ export const tgCounterDefaultProps = {
   inlineLabelPrinter: (props, state) => `${props.label}: ${state.value}`,
   ctx: null,
   options: [
-    { delta: 1, label: '➖' },
-    { delta: -1, label: '➕' },
+    { delta: -1, label: '➖' },
+    { delta: 1, label: '➕' },
   ],
 } as const satisfies OptionalProps;
 
@@ -82,8 +82,7 @@ export class TgCounter extends TgComponent<State, Props> {
 
   public add(delta: number) {
     const state = this.getState();
-    this.setState({
-      ...state,
+    this.patchState({
       value: state.value + delta,
     });
   }

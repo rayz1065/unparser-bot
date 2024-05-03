@@ -56,7 +56,7 @@ export class TgComponentsArray<
   }
 
   public getDefaultState(): State<InstanceType<ChildCtor>, C> {
-    return this.getChildrenState();
+    return this.getChildrenDefaultState();
   }
 
   public async render() {

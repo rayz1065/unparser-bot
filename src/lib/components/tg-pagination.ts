@@ -125,45 +125,41 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
   constructor(props: RequiredProps<T> & Partial<OptionalProps<T>>) {
     super({ ...tgPaginationDefaultProps, ...props });
 
-    this.counter = this.addChild(
-      'c',
-      new TgCounter({
-        ...this.getDefaultProps('c'),
-        label: '📄',
-        ctx: this.props.ctx,
-        options: async (counterProps, counterState) => {
-          const page = counterState.value;
+    this.counter = this.makeChild('c', TgCounter, {
+      label: '📄',
+      ctx: this.props.ctx,
+      options: async (counterProps, counterState) => {
+        const page = counterState.value;
 
-          const outOfBoundsLabel = await this.getProperty('outOfBoundsLabel');
-          const previousPageLabel = await this.getProperty('previousPageLabel');
-          const nextPageLabel = await this.getProperty('nextPageLabel');
-          const perPage = await this.getProperty('perPage');
-          const total = await this.getProperty('total');
+        const outOfBoundsLabel = await this.getProperty('outOfBoundsLabel');
+        const previousPageLabel = await this.getProperty('previousPageLabel');
+        const nextPageLabel = await this.getProperty('nextPageLabel');
+        const perPage = await this.getProperty('perPage');
+        const total = await this.getProperty('total');
 
-          const maxPage = Math.ceil(total / Math.max(perPage, 1)) - 1;
+        const maxPage = Math.ceil(total / Math.max(perPage, 1)) - 1;
 
-          return [
-            {
-              delta: -1,
-              label: page > 0 ? previousPageLabel : outOfBoundsLabel,
-            },
-            {
-              delta: 1,
-              label: page < maxPage ? nextPageLabel : outOfBoundsLabel,
-            },
-          ];
-        },
-        inlineLabelPrinter: async (counterProps, counterState) => {
-          const perPage = await this.getProperty('perPage');
-          const total = await this.getProperty('total');
-          const maxPage = Math.ceil(total / Math.max(perPage, 1)) - 1;
+        return [
+          {
+            delta: -1,
+            label: page > 0 ? previousPageLabel : outOfBoundsLabel,
+          },
+          {
+            delta: 1,
+            label: page < maxPage ? nextPageLabel : outOfBoundsLabel,
+          },
+        ];
+      },
+      inlineLabelPrinter: async (counterProps, counterState) => {
+        const perPage = await this.getProperty('perPage');
+        const total = await this.getProperty('total');
+        const maxPage = Math.ceil(total / Math.max(perPage, 1)) - 1;
 
-          return `${counterProps.label} ${counterState.value + 1} / ${
-            maxPage + 1
-          }`;
-        },
-      })
-    );
+        return `${counterProps.label} ${counterState.value + 1} / ${
+          maxPage + 1
+        }`;
+      },
+    });
 
     this.counter.overrideHandler(this.counter.handlers.add, async (delta) => {
       // override setState function to avoid going out of bounds
@@ -194,10 +190,10 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
   }
 
   public getDefaultState(): State {
-    return this.getChildrenState() as State;
+    return this.getChildrenDefaultState() as State;
   }
 
-  public async render(): Promise<TgMessage> {
+  public async render() {
     const { renderPage } = this.props;
     const counter = await this.counter.render();
     const pageIndex = this.getState().c.value;
@@ -214,6 +210,6 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
     return {
       text: page.text,
       keyboard: [...(page.keyboard ?? []), ...(counter.keyboard ?? [])],
-    };
+    } satisfies TgMessage;
   }
 }

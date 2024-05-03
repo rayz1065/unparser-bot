@@ -26,24 +26,27 @@ export interface TgMessage<C extends Context = Context> {
   other?: Omit<Other<C>, 'reply_markup'>;
 }
 
-type TgStateBase = Record<string, any>;
+type TgStateBase = Record<string, any> | null;
 
-type TgButtonGetter = (
+export type TgButtonGetter<T extends any[] = any[]> = (
   text: string,
-  handler: string,
-  ...args: any[]
+  permanentId: string,
+  ...args: T
 ) => InlineKeyboardButton;
-type TgStateGetter<State extends TgStateBase = TgStateBase> =
+export type TgStateGetter<State extends TgStateBase = TgStateBase> =
   () => State | null;
-type TgStateSetter<State extends TgStateBase = TgStateBase> = (
+export type TgStateSetter<State extends TgStateBase = TgStateBase> = (
   state: State
 ) => void;
 
-export type TgDefaultProps<State extends TgStateBase> = {
-  getButton: TgButtonGetter;
+export type TgStateProps<State extends TgStateBase> = {
   getState: TgStateGetter<State>;
   setState: TgStateSetter<State>;
 };
+
+export type TgDefaultProps<State extends TgStateBase> = {
+  getButton: TgButtonGetter;
+} & TgStateProps<State>;
 
 type HandlerFunction<T extends any[] = any[]> = (
   ...args: T
@@ -64,7 +67,7 @@ type TgPropsBase<State extends TgStateBase> = Record<string, any> &
  *   the parent component is tasked to call the respective handler
  */
 export abstract class TgComponent<
-  State extends TgStateBase = Record<string, never>,
+  State extends TgStateBase = null,
   Props extends TgPropsBase<State> = TgPropsBase<State>,
   C extends Context = Context,
 > {
@@ -90,12 +93,11 @@ export abstract class TgComponent<
 
   public abstract getDefaultState(): State;
 
-  protected getChildrenState() {
+  protected getChildrenDefaultState() {
     return Object.fromEntries(
-      Object.entries(this.children).map(([key, child]) => [
-        key,
-        child.getDefaultState(),
-      ])
+      Object.entries(this.children)
+        .map(([key, child]) => [key, child.getDefaultState()])
+        .filter(([, state]) => state !== null)
     );
   }
 
@@ -121,7 +123,7 @@ export abstract class TgComponent<
   /**
    * Helper function to partially update the state.
    */
-  public patchState(state: Partial<State>) {
+  public patchState(state: State extends null ? never : Partial<State>) {
     this.setState({
       ...this.getState(),
       ...state,
@@ -262,8 +264,8 @@ export abstract class TgComponent<
    */
   public makeChild<
     Key extends keyof State & string,
-    PropsArg extends TgPropsBase<State[Key]>,
-    T extends TgComponent<State[Key], PropsArg, C>,
+    PropsArg extends TgPropsBase<State extends null ? null : State[Key]>,
+    T extends TgComponent<State extends null ? null : State[Key], PropsArg, C>,
   >(
     key: Key,
     ctor: new (props: PropsArg) => T,
@@ -284,11 +286,39 @@ export abstract class TgComponent<
    * Creates all the default props for the given key.
    * This can be used in cases makeChild does not cover.
    */
-  public getDefaultProps<K extends keyof State & string>(
-    key: K
-  ): TgDefaultProps<State[K]> {
+  public getDefaultProps<Key extends keyof State & string>(
+    key: Key
+  ): TgDefaultProps<State extends null ? null : State[Key]> {
     return {
-      getState: () => this.getState()[key],
+      ...this.getButtonProps(key),
+      ...this.getStateProps(key),
+    };
+  }
+
+  /**
+   * Creates just the default props relating to the button for the given key.
+   * This can be used in cases makeChild does not cover.
+   * It also does not require the key to be a valid key of the state.
+   */
+  public getButtonProps(key: string): { getButton: TgButtonGetter } {
+    return {
+      getButton: (text, handler, ...args) =>
+        this.props.getButton(text, `${key}.${handler}`, ...args),
+    };
+  }
+
+  /**
+   * Creates just the default props relating to state for the given key.
+   * This can be used in cases makeChild does not cover.
+   */
+  public getStateProps<Key extends keyof State & string>(
+    key: Key
+  ): TgStateProps<State extends null ? null : State[Key]> {
+    return {
+      getState: () => {
+        const state = this.getState();
+        return state === null ? null : state[key];
+      },
       setState: (state) => {
         // using patchState here leads to an error
         this.setState({
@@ -296,8 +326,6 @@ export abstract class TgComponent<
           [key]: state,
         });
       },
-      getButton: (text, handler, ...args) =>
-        this.props.getButton(text, `${key}.${handler}`, ...args),
     };
   }
 

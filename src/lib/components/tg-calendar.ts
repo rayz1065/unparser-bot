@@ -1,6 +1,5 @@
 import { Context } from 'grammy';
 import {
-  GetStateType,
   MaybeLazyProperty,
   TgComponent,
   TgDefaultProps,
@@ -33,7 +32,6 @@ type State = {
   decade: number;
   year: number;
   month: number;
-  c: GetStateType<TgCounter>;
 };
 
 /**
@@ -139,25 +137,34 @@ export class TgCalendar extends TgComponent<State, Props> {
 
     const { ctx } = this.props;
 
-    this.counter = this.makeChild('c', TgCounter, {
-      label: async () => {
-        const state = this.getState();
-        const calendarLocaleData = await this.getProperty('calendarLocaleData');
-        if (state.view === 'month') {
-          return `${calendarLocaleData.monthsShort[state.month]} ${state.year}`;
-        } else if (state.view === 'year') {
-          return `${state.year}`;
-        } else {
-          return `${state.decade} - ${state.decade + 9}`;
-        }
-      },
-      inlineLabelPrinter: (props) => props.label,
-      ctx,
-      options: [
-        { delta: -1, label: '⬅️' },
-        { delta: 1, label: '➡️' },
-      ],
-    });
+    this.counter = this.addChild(
+      'c',
+      new TgCounter({
+        label: async () => {
+          const state = this.getState();
+          const calendarLocaleData =
+            await this.getProperty('calendarLocaleData');
+          if (state.view === 'month') {
+            return `${calendarLocaleData.monthsShort[state.month]} ${
+              state.year
+            }`;
+          } else if (state.view === 'year') {
+            return `${state.year}`;
+          } else {
+            return `${state.decade} - ${state.decade + 9}`;
+          }
+        },
+        inlineLabelPrinter: (props) => props.label,
+        ctx,
+        options: [
+          { delta: -1, label: '⬅️' },
+          { delta: 1, label: '➡️' },
+        ],
+        ...this.getButtonProps('c'),
+        getState: () => ({ value: 0 }),
+        setState: () => {},
+      })
+    );
 
     this.counter.overrideHandler(
       this.counter.handlers.inlineLabelClicked,
@@ -255,12 +262,11 @@ export class TgCalendar extends TgComponent<State, Props> {
     const now = dayjs();
 
     return {
-      ...this.getChildrenState(),
       view: 'month',
       decade: now.year() - (now.year() % 10),
       year: now.year(),
       month: now.month(),
-    } as State;
+    };
   }
 
   public async getMonthView() {
