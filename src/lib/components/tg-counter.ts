@@ -1,20 +1,17 @@
 import { InlineKeyboardButton } from 'grammy/types';
-import {
-  MaybeLazyProperty,
-  TgComponent,
-  TgDefaultProps,
-} from './tg-components';
+import { TgComponent } from './tg-components';
 import { Context } from 'grammy';
 import { MaybePromise } from './maybe-callable';
+import { MakeOptional, MaybeLazyProperty, TgDefaultProps } from './types';
 
 interface State {
   value: number;
 }
 
-interface OptionalProps {
+type Props = TgDefaultProps<State> & {
+  label: MaybeLazyProperty<string, State>;
   inlineLabelPosition: MaybeLazyProperty<
     'left' | 'center' | 'right' | 'none',
-    Props,
     State
   >;
   inlineLabelPrinter: (
@@ -26,13 +23,8 @@ interface OptionalProps {
     state: State
   ) => MaybePromise<string>;
   ctx: null | Context;
-  options: MaybeLazyProperty<{ delta: number; label: string }[], Props, State>;
-}
-type RequiredProps = TgDefaultProps<State> & {
-  label: MaybeLazyProperty<string, Props, State>;
+  options: MaybeLazyProperty<{ delta: number; label: string }[], State>;
 };
-
-type Props = RequiredProps & OptionalProps;
 
 export const tgCounterDefaultProps = {
   inlineLabelPosition: 'center',
@@ -43,7 +35,7 @@ export const tgCounterDefaultProps = {
     { delta: -1, label: '➖' },
     { delta: 1, label: '➕' },
   ],
-} as const satisfies OptionalProps;
+} as const satisfies Partial<Props>;
 
 /**
  * A simple counter component, you can pass in custom options and pick the
@@ -72,7 +64,9 @@ export class TgCounter extends TgComponent<State, Props> {
     },
   };
 
-  public constructor(props: Partial<OptionalProps> & RequiredProps) {
+  public constructor(
+    props: MakeOptional<Props, keyof typeof tgCounterDefaultProps>
+  ) {
     super({ ...tgCounterDefaultProps, ...props });
   }
 

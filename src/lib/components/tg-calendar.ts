@@ -1,14 +1,15 @@
 import { Context } from 'grammy';
-import {
-  MaybeLazyProperty,
-  TgComponent,
-  TgDefaultProps,
-  TgMessage,
-} from './tg-components';
+import { TgComponent } from './tg-components';
 import dayjs, { Dayjs } from 'dayjs';
 import { InlineKeyboardButton } from 'grammy/types';
 import { TgCounter } from './tg-counter';
 import { tgButtonsGrid } from './tg-buttons-grid';
+import {
+  MakeOptional,
+  MaybeLazyProperty,
+  TgDefaultProps,
+  TgMessage,
+} from './types';
 
 interface CalendarLocaleData {
   weekdays: string[];
@@ -18,14 +19,10 @@ interface CalendarLocaleData {
   firstDayOfWeek: number;
 }
 
-type RequiredProps = TgDefaultProps<State>;
-
-type OptionalProps = {
+type Props = {
   ctx: Context | null;
-  calendarLocaleData: MaybeLazyProperty<CalendarLocaleData, Props, State>;
-};
-
-type Props = RequiredProps & OptionalProps;
+  calendarLocaleData: MaybeLazyProperty<CalendarLocaleData, State>;
+} & TgDefaultProps<State>;
 
 type State = {
   view: 'month' | 'year' | 'decade';
@@ -54,7 +51,7 @@ export function tgCalendarLocaleDataFromDayjs(
 export const tgCalendarDefaultProps = {
   ctx: null,
   calendarLocaleData: () => tgCalendarLocaleDataFromDayjs('en'),
-} as const satisfies OptionalProps;
+} satisfies Partial<Props>;
 
 /**
  * Get the days of the calendar for the month view.
@@ -132,7 +129,7 @@ export class TgCalendar extends TgComponent<State, Props> {
     },
   };
 
-  constructor(props: RequiredProps & Partial<OptionalProps>) {
+  constructor(props: MakeOptional<Props, keyof typeof tgCalendarDefaultProps>) {
     super({ ...tgCalendarDefaultProps, ...props });
 
     const { ctx } = this.props;
@@ -160,7 +157,7 @@ export class TgCalendar extends TgComponent<State, Props> {
           { delta: -1, label: '⬅️' },
           { delta: 1, label: '➡️' },
         ],
-        ...this.getButtonProps('c'),
+        ...this.getEventProps('c'),
         getState: () => ({ value: 0 }),
         setState: () => {},
       })

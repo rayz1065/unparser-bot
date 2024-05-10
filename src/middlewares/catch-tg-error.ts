@@ -1,38 +1,12 @@
 import { Context, Middleware } from 'grammy';
-import { I18nFlavor, TranslationVariables } from '@grammyjs/i18n';
-
-/**
- * An error to be displayed to the user
- */
-export class TgError extends Error {
-  public variables?: TranslationVariables;
-
-  public constructor(
-    message: string,
-    variables?: TranslationVariables | undefined
-  ) {
-    super(message);
-    this.variables = variables;
-  }
-}
+import { I18nFlavor } from '@grammyjs/i18n';
+import { TgError, defaultTgErrorHandler } from '../lib/tg-error';
 
 export async function defaultCatchTgErrorsHandler(
   ctx: Context & I18nFlavor,
   error: TgError
 ) {
-  const prettyError = ctx.t(error.message, error.variables);
-
-  try {
-    if (ctx.callbackQuery) {
-      await ctx.answerCallbackQuery(prettyError);
-    } else if (ctx.chat?.type === 'private') {
-      await ctx.reply(prettyError);
-    } else {
-      console.error('catchTgErrors used but nowhere to show the error', ctx);
-    }
-  } catch (error) {
-    console.error('error while showing error', error);
-  }
+  await defaultTgErrorHandler(ctx, error);
 }
 
 export interface CatchTgErrorsOptions<T extends Context> {

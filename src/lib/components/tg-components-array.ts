@@ -1,6 +1,7 @@
 import { Context } from 'grammy';
-import { TgComponent, TgDefaultProps } from './tg-components';
+import { TgComponent } from './tg-components';
 import { InlineKeyboardButton } from 'grammy/types';
+import { TgDefaultProps } from './types';
 
 type GetChildState<ChildComponent extends TgComponent<any, any, any>> =
   ChildComponent extends TgComponent<infer T, any, any> ? T : never;

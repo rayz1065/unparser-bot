@@ -1,34 +1,31 @@
 import { tgButtonsGrid } from './tg-buttons-grid';
+import { TgComponent } from './tg-components';
+import { InlineKeyboardButton } from 'grammy/types';
 import {
+  MakeOptional,
   MaybeLazyProperty,
-  TgComponent,
   TgDefaultProps,
   TgStateProps,
-} from './tg-components';
-import { InlineKeyboardButton } from 'grammy/types';
+} from './types';
 
-type RequiredProps = {
+type Props = {
   items: MaybeLazyProperty<
     {
       label: string;
       value: string;
       getButton: (label: string, value: string) => InlineKeyboardButton;
     }[],
-    Props,
     State
   >;
-  selectedItem: MaybeLazyProperty<string, Props, State>;
+  selectedItem: MaybeLazyProperty<string, State>;
+
+  labelPrinter: (label: string, selected: boolean) => string;
+  columns: MaybeLazyProperty<number, State>;
 } & Pick<
   TgDefaultProps<State>,
   Exclude<keyof TgDefaultProps<any>, keyof TgStateProps<any>>
->;
-
-type OptionalProps = {
-  labelPrinter: (label: string, selected: boolean) => string;
-  columns: MaybeLazyProperty<number, Props, State>;
-} & TgStateProps<State>;
-
-type Props = RequiredProps & OptionalProps;
+> &
+  TgStateProps<State>;
 
 type State = null;
 
@@ -37,7 +34,7 @@ export const tgNavbarDefaultProps = {
   columns: 3,
   getState: () => null,
   setState: () => {},
-} as const satisfies OptionalProps;
+} as const satisfies Partial<Props>;
 
 /**
  * A simple navbar to be integrated within another component, can be used
@@ -83,7 +80,9 @@ export const tgNavbarDefaultProps = {
  * ```
  */
 export class TgNavbar extends TgComponent<State, Props> {
-  public constructor(props: RequiredProps & Partial<OptionalProps>) {
+  public constructor(
+    props: MakeOptional<Props, keyof typeof tgNavbarDefaultProps>
+  ) {
     super({ ...props, ...tgNavbarDefaultProps });
   }
 

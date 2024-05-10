@@ -1,70 +1,34 @@
 import { Context } from 'grammy';
-import { InlineKeyboardButton } from 'grammy/types';
-import {
-  MaybeCallable,
-  MaybeCalled,
-  MaybePromise,
-  maybeCall,
-} from './maybe-callable';
+import { MaybeCalled, MaybePromise, maybeCall } from './maybe-callable';
 import { stringifyHash } from './stringify-hash';
-
-type Other<C extends Context> = Parameters<C['api']['sendMessage']>[2];
+import {
+  HandlerData,
+  HandlerFunction,
+  MakeOptional,
+  TextInputEventListener,
+  TgButtonGetter,
+  TgDefaultProps,
+  TgMessage,
+  TgPropsBase,
+  TgStateBase,
+  TgStateProps,
+} from './types';
 
 export type GetPropsType<T extends TgComponent<any, any, any>> =
   T extends TgComponent<any, infer P, any> ? P : never;
+
 export type GetStateType<T extends TgComponent<any, any, any>> =
   T extends TgComponent<infer S, any, any> ? S : never;
-
-export type MaybeLazyProperty<T, Props, State> = MaybeCallable<
-  T,
-  [Props, State]
->;
-
-export interface TgMessage<C extends Context = Context> {
-  text: string;
-  keyboard?: InlineKeyboardButton[][];
-  other?: Omit<Other<C>, 'reply_markup'>;
-}
-
-type TgStateBase = Record<string, any> | null;
-
-export type TgButtonGetter<T extends any[] = any[]> = (
-  text: string,
-  permanentId: string,
-  ...args: T
-) => InlineKeyboardButton;
-export type TgStateGetter<State extends TgStateBase = TgStateBase> =
-  () => State | null;
-export type TgStateSetter<State extends TgStateBase = TgStateBase> = (
-  state: State
-) => void;
-
-export type TgStateProps<State extends TgStateBase> = {
-  getState: TgStateGetter<State>;
-  setState: TgStateSetter<State>;
-};
-
-export type TgDefaultProps<State extends TgStateBase> = {
-  getButton: TgButtonGetter;
-} & TgStateProps<State>;
-
-type HandlerFunction<T extends any[] = any[]> = (
-  ...args: T
-) => MaybePromise<void>;
-type HandlerData<T extends any[] = any[]> = {
-  permanentId: string;
-  handler: HandlerFunction<T>;
-};
-
-type TgPropsBase<State extends TgStateBase> = Record<string, any> &
-  TgDefaultProps<State>;
 
 /**
  * A TgComponent is a reactive stateful component within telegram.
  * The component takes as input a set of props, the most important ones are
- * - getState, setState, related to state management
+ * - getState, setState, related to state management;
  * - getButton, a function that returns a button, when the button is called
- *   the parent component is tasked to call the respective handler
+ *   the parent component is tasked to call the respective handler;
+ * - listenForTextInput, a function to be used in the rendering method if the
+ *   component is expecting the user to write text in a message. See
+ *   `memorizeTextInputRequests` for how this behavior can be customized.
  */
 export abstract class TgComponent<
   State extends TgStateBase = null,
@@ -86,6 +50,15 @@ export abstract class TgComponent<
    * If the state changes, the props have to be recomputed.
    */
   private propsCacheState = '';
+
+  /**
+   * If `memorizeTextInputRequests` is used, the (latest) request for each
+   * child will be stored in this variable. It can then be used to decide
+   * whether the child should have the request fulfilled.
+   *
+   * See `this.memorizeTextInputRequests` for an example of usage.
+   */
+  public requestedTextInput: Record<string, string> = {};
 
   constructor(public props: Props) {}
 
@@ -159,6 +132,16 @@ export abstract class TgComponent<
   }
 
   /**
+   * Register a listener for text input for the given handler.
+   */
+  public listenForTextInput(permanentId: string | HandlerData<[string]>) {
+    permanentId =
+      typeof permanentId === 'string' ? permanentId : permanentId.permanentId;
+
+    return this.props.listenForTextInput?.(permanentId);
+  }
+
+  /**
    * Register a new handler that can be used for routing calls.
    * The permanentId is used in routing, it should be 1 or 2 characters and
    * must be unique. The permanentId cannot be changed after deploying the
@@ -170,11 +153,11 @@ export abstract class TgComponent<
   public registerHandler(permanentId: string, handler: HandlerFunction) {
     const handlerKey = `.${permanentId}`;
 
-    if (handlerKey in this.handlers) {
-      throw Error(`Trying to handler key ${handlerKey} already exists`);
-    }
     if (this.findHandler(permanentId)) {
-      throw Error(`Trying to register handler ${permanentId} already exists`);
+      throw Error(`Trying to re-register existing handler id ${permanentId}`);
+    }
+    if (handlerKey in this.handlers) {
+      throw Error(`Trying to re-register existing handler key ${handlerKey}`);
     }
 
     this.handlers[handlerKey] = { permanentId, handler };
@@ -264,21 +247,22 @@ export abstract class TgComponent<
    */
   public makeChild<
     Key extends keyof State & string,
-    PropsArg extends TgPropsBase<State extends null ? null : State[Key]>,
-    T extends TgComponent<State extends null ? null : State[Key], PropsArg, C>,
+    Ctor extends new (props: any) => any,
   >(
     key: Key,
-    ctor: new (props: PropsArg) => T,
-    props: Pick<PropsArg, Exclude<keyof PropsArg, keyof TgDefaultProps<any>>>
-    // note: adding the following breaks the typing inference in unexpected ways
-    // & Partial<TgDefaultProps<State[Key]>>
-  ): T {
+    ctor: Ctor,
+    // NoInfer ensures that the type of props is not inferred from the value of
+    // props but from the type of Ctor.
+    props: NoInfer<
+      MakeOptional<ConstructorParameters<Ctor>[0], keyof TgDefaultProps<any>>
+    >
+  ): InstanceType<Ctor> {
     return this.addChild(
       key,
       new ctor({
         ...this.getDefaultProps(key),
         ...props,
-      } as PropsArg)
+      })
     );
   }
 
@@ -290,20 +274,62 @@ export abstract class TgComponent<
     key: Key
   ): TgDefaultProps<State extends null ? null : State[Key]> {
     return {
-      ...this.getButtonProps(key),
+      ...this.getEventProps(key),
       ...this.getStateProps(key),
     };
   }
 
   /**
-   * Creates just the default props relating to the button for the given key.
+   * Creates just the default props relating to the events for the given key.
    * This can be used in cases makeChild does not cover.
    * It also does not require the key to be a valid key of the state.
    */
-  public getButtonProps(key: string): { getButton: TgButtonGetter } {
+  public getEventProps(key: string): {
+    getButton: TgButtonGetter;
+    listenForTextInput: TextInputEventListener;
+  } {
     return {
       getButton: (text, handler, ...args) =>
         this.props.getButton(text, `${key}.${handler}`, ...args),
+      listenForTextInput: (permanentId) =>
+        this.listenForTextInput(`${key}.${permanentId}`),
+    };
+  }
+
+  /**
+   * Instead of transparently passing the listenForTextInput request to the
+   * parent you can control exactly how and when the text input requests are
+   * allowed through. If a request is made by component `key`, the request will
+   * be found on `this.requestedTextInput[key]`.
+   *
+   * This is useful when multiple children can request text inputs but some are
+   * not rendered.
+   *
+   * Example:
+   * ```ts
+   * // constructor
+   * this.makeChild('f', TgTextFormField, {
+   *  label: 'Text field',
+   *  ...this.memorizeTextInputRequests('f'),
+   * });
+   *
+   * //...
+   *
+   * // render
+   * const state = this.getState();
+   * const request = this.requestedTextInput[state.activeKey];
+   * if (request && state.enabled) {
+   *   await this.listenForTextInput(request);
+   * }
+   * ```
+   */
+  public memorizeTextInputRequests(key: string): {
+    listenForTextInput?: TextInputEventListener;
+  } {
+    return {
+      listenForTextInput: (permanentId) => {
+        this.requestedTextInput[key] = `${key}.${permanentId}`;
+      },
     };
   }
 
@@ -330,7 +356,24 @@ export abstract class TgComponent<
   }
 
   /**
-   * Get the value of a lazy loaded property, the value is also cached
+   * Loads all of the indicated properties and returns them in a single object.
+   */
+  public async getProperties<T extends (keyof Props & string)[]>(
+    ...properties: T
+  ): Promise<{
+    [Key in keyof Pick<Props, T[number]>]: Awaited<MaybeCalled<Props[Key]>>;
+  }> {
+    return Object.fromEntries(
+      await Promise.all(
+        properties.map(async (key) => [key, await this.getProperty(key)])
+      )
+    );
+  }
+
+  /**
+   * Get the value of a lazy loaded property, the value is also cached.
+   * Ensure that the key refers to a lazy property and not a different
+   * callable, as the function will be called with the state of the component.
    */
   public async getProperty<K extends keyof Props & string>(
     key: K
@@ -346,7 +389,7 @@ export abstract class TgComponent<
       return cached;
     }
 
-    const prop = await maybeCall(this.props[key], this.props, this.getState());
+    const prop = await maybeCall(this.props[key], this.getState());
     this.propsCache[key] = prop;
     return prop;
   }

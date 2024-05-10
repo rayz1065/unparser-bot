@@ -1,32 +1,27 @@
-import {
-  MaybeLazyProperty,
-  TgComponent,
-  TgDefaultProps,
-  TgMessage,
-} from './tg-components';
+import { TgComponent } from './tg-components';
 import { MaybePromise } from './maybe-callable';
 import { TgNavbar } from './tg-navbar';
+import {
+  MakeOptional,
+  MaybeLazyProperty,
+  TgDefaultProps,
+  TgMessage,
+} from './types';
 
-type RequiredProps = {
+type Props = {
   tabs: MaybeLazyProperty<
     {
       label: string;
       value: string;
     }[],
-    Props,
     State
   >;
   defaultTab: string;
   renderTab: (tab: string) => MaybePromise<TgMessage>;
-} & TgDefaultProps<State>;
-
-type OptionalProps = {
   labelPrinter: (label: string, selected: boolean) => string;
-  columns: MaybeLazyProperty<number, Props, State>;
-  includeNavbarTitle: MaybeLazyProperty<boolean, Props, State>;
-};
-
-type Props = RequiredProps & OptionalProps;
+  columns: MaybeLazyProperty<number, State>;
+  includeNavbarTitle: MaybeLazyProperty<boolean, State>;
+} & TgDefaultProps<State>;
 
 type State = {
   tab: string;
@@ -37,7 +32,7 @@ export const tgTabsDefaultProps = {
   labelPrinter: (label, selected) => (selected ? `• ${label} •` : label),
   columns: 3,
   includeNavbarTitle: true,
-} as const satisfies OptionalProps;
+} satisfies Partial<Props>;
 
 /**
  *
@@ -72,13 +67,15 @@ export class TgTabs extends TgComponent<State, Props> {
 
   public navbar: TgNavbar;
 
-  public constructor(props: RequiredProps & Partial<OptionalProps>) {
+  public constructor(
+    props: MakeOptional<Props, keyof typeof tgTabsDefaultProps>
+  ) {
     super({ ...props, ...tgTabsDefaultProps });
 
     this.navbar = this.addChild(
       'n',
       new TgNavbar({
-        ...this.getButtonProps('n'),
+        ...this.getEventProps('n'),
         selectedItem: () => this.getState().tab,
         items: async () =>
           (await this.getProperty('tabs')).map((tab) => ({

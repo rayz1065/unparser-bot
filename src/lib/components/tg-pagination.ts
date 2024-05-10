@@ -1,15 +1,15 @@
 import { Context } from 'grammy';
 import { MaybePromise } from './maybe-callable';
 import { tgButtonsGrid } from './tg-buttons-grid';
-import {
-  GetStateType,
-  MaybeLazyProperty,
-  TgComponent,
-  TgDefaultProps,
-  TgMessage,
-} from './tg-components';
+import { GetStateType, TgComponent } from './tg-components';
 import { TgCounter } from './tg-counter';
 import { InlineKeyboardButton } from 'grammy/types';
+import {
+  MakeOptional,
+  MaybeLazyProperty,
+  TgDefaultProps,
+  TgMessage,
+} from './types';
 
 type PageInfo = {
   page: number;
@@ -21,25 +21,18 @@ type PageRenderer<T> = (
   pageInfo: PageInfo
 ) => MaybePromise<TgMessage>;
 
-type OptionalProps<T> = {
-  perPage: MaybeLazyProperty<number, Props<T>, State>;
-  ctx: Context | null;
-  outOfBoundsLabel: MaybeLazyProperty<string, Props<T>, State>;
-  previousPageLabel: MaybeLazyProperty<string, Props<T>, State>;
-  nextPageLabel: MaybeLazyProperty<string, Props<T>, State>;
-};
-
-type RequiredProps<T> = {
+type Props<T> = {
   renderPage: PageRenderer<T>;
   loadPage: (pageInfo: PageInfo) => MaybePromise<T[]>;
-  total: MaybeLazyProperty<number, Props<T>, State>;
+  total: MaybeLazyProperty<number, State>;
+  perPage: MaybeLazyProperty<number, State>;
+  ctx: Context | null;
+  outOfBoundsLabel: MaybeLazyProperty<string, State>;
+  previousPageLabel: MaybeLazyProperty<string, State>;
+  nextPageLabel: MaybeLazyProperty<string, State>;
 } & TgDefaultProps<State>;
 
-type Props<T> = OptionalProps<T> & RequiredProps<T>;
-
-type State = {
-  c: GetStateType<TgCounter>;
-};
+type State = GetStateType<TgCounter>;
 
 export const tgPaginationDefaultProps = {
   perPage: 30,
@@ -47,7 +40,7 @@ export const tgPaginationDefaultProps = {
   outOfBoundsLabel: '🚫',
   previousPageLabel: '⬅️',
   nextPageLabel: '➡️',
-} as const satisfies OptionalProps<any>;
+} satisfies Partial<Props<any>>;
 
 /**
  * Renders each element in the pagination as a button and optionally some text,
@@ -98,7 +91,7 @@ export function renderAsButtonsGrid<T>({
  *       .map((x) => x + skip)
  *       .filter((x) => x >= 0 && x < total),
  *   total,
- *   renderPage: renderAsButtonsGrid({
+ *   renderPage: renderAsButtonsGrid<number>({
  *     columns: 3,
  *     renderElement: (element) => {
  *       return {
@@ -122,53 +115,55 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
     },
   };
 
-  constructor(props: RequiredProps<T> & Partial<OptionalProps<T>>) {
+  constructor(
+    props: MakeOptional<Props<T>, keyof typeof tgPaginationDefaultProps>
+  ) {
     super({ ...tgPaginationDefaultProps, ...props });
 
-    this.counter = this.makeChild('c', TgCounter, {
-      label: '📄',
-      ctx: this.props.ctx,
-      options: async (counterProps, counterState) => {
-        const page = counterState.value;
+    this.counter = this.addChild(
+      'c',
+      new TgCounter({
+        ...this.getEventProps('c'),
+        getState: () => this.getState(),
+        setState: (state) => this.setState(state),
+        label: '📄',
+        ctx: this.props.ctx,
+        options: async (counterState) => {
+          const page = counterState.value;
 
-        const outOfBoundsLabel = await this.getProperty('outOfBoundsLabel');
-        const previousPageLabel = await this.getProperty('previousPageLabel');
-        const nextPageLabel = await this.getProperty('nextPageLabel');
-        const perPage = await this.getProperty('perPage');
-        const total = await this.getProperty('total');
+          const outOfBoundsLabel = await this.getProperty('outOfBoundsLabel');
+          const previousPageLabel = await this.getProperty('previousPageLabel');
+          const nextPageLabel = await this.getProperty('nextPageLabel');
 
-        const maxPage = Math.ceil(total / Math.max(perPage, 1)) - 1;
+          const maxPage = await this.getMaxPage();
 
-        return [
-          {
-            delta: -1,
-            label: page > 0 ? previousPageLabel : outOfBoundsLabel,
-          },
-          {
-            delta: 1,
-            label: page < maxPage ? nextPageLabel : outOfBoundsLabel,
-          },
-        ];
-      },
-      inlineLabelPrinter: async (counterProps, counterState) => {
-        const perPage = await this.getProperty('perPage');
-        const total = await this.getProperty('total');
-        const maxPage = Math.ceil(total / Math.max(perPage, 1)) - 1;
+          return [
+            {
+              delta: -1,
+              label: page > 0 ? previousPageLabel : outOfBoundsLabel,
+            },
+            {
+              delta: 1,
+              label: page < maxPage ? nextPageLabel : outOfBoundsLabel,
+            },
+          ];
+        },
+        inlineLabelPrinter: async (counterProps, counterState) => {
+          const maxPage = await this.getMaxPage();
 
-        return `${counterProps.label} ${counterState.value + 1} / ${
-          maxPage + 1
-        }`;
-      },
-    });
+          return `${counterProps.label} ${counterState.value + 1} / ${
+            maxPage + 1
+          }`;
+        },
+      })
+    );
 
     this.counter.overrideHandler(this.counter.handlers.add, async (delta) => {
       // override setState function to avoid going out of bounds
-      const perPage = await this.getProperty('perPage');
-      const total = await this.getProperty('total');
-      const maxPage = Math.ceil(total / Math.max(perPage, 1)) - 1;
+      const maxPage = await this.getMaxPage();
 
       const state = this.getState();
-      let page = state.c.value + delta;
+      let page = state.value + delta;
 
       if (page < 0 || page > maxPage) {
         page = Math.max(0, Math.min(page, maxPage));
@@ -177,6 +172,12 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
 
       this.counter.patchState({ value: page });
     });
+  }
+
+  public async getMaxPage() {
+    const { perPage, total } = await this.getProperties('perPage', 'total');
+
+    return Math.max(0, Math.ceil(total / Math.max(perPage, 1)) - 1);
   }
 
   /**
@@ -196,7 +197,7 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
   public async render() {
     const { renderPage } = this.props;
     const counter = await this.counter.render();
-    const pageIndex = this.getState().c.value;
+    const pageIndex = Math.min(this.getState().value, await this.getMaxPage());
     const perPage = await this.getProperty('perPage');
     const pageInfo: PageInfo = {
       page: pageIndex,
