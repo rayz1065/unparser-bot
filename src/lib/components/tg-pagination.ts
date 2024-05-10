@@ -30,6 +30,7 @@ type Props<T> = {
   outOfBoundsLabel: MaybeLazyProperty<string, State>;
   previousPageLabel: MaybeLazyProperty<string, State>;
   nextPageLabel: MaybeLazyProperty<string, State>;
+  paginationPosition: MaybeLazyProperty<'top' | 'bottom', State>;
 } & TgDefaultProps<State>;
 
 type State = GetStateType<TgCounter>;
@@ -40,6 +41,7 @@ export const tgPaginationDefaultProps = {
   outOfBoundsLabel: '🚫',
   previousPageLabel: '⬅️',
   nextPageLabel: '➡️',
+  paginationPosition: 'bottom',
 } satisfies Partial<Props<any>>;
 
 /**
@@ -191,14 +193,17 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
   }
 
   public getDefaultState(): State {
-    return this.getChildrenDefaultState() as State;
+    return this.counter.getDefaultState();
   }
 
   public async render() {
     const { renderPage } = this.props;
     const counter = await this.counter.render();
     const pageIndex = Math.min(this.getState().value, await this.getMaxPage());
-    const perPage = await this.getProperty('perPage');
+    const { perPage, paginationPosition } = await this.getProperties(
+      'perPage',
+      'paginationPosition'
+    );
     const pageInfo: PageInfo = {
       page: pageIndex,
       skip: pageIndex * perPage,
@@ -210,7 +215,10 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
 
     return {
       text: page.text,
-      keyboard: [...(page.keyboard ?? []), ...(counter.keyboard ?? [])],
+      keyboard:
+        paginationPosition === 'top'
+          ? [...counter.keyboard, ...(page.keyboard ?? [])]
+          : [...(page.keyboard ?? []), ...counter.keyboard],
     } satisfies TgMessage;
   }
 }
