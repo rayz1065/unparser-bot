@@ -1,5 +1,6 @@
 import { Context, Middleware, SessionFlavor } from 'grammy';
 import { JsonValue } from './safe-json';
+import { MessageFilterQuery } from './types';
 
 export type TgComponentState<T extends Record<string, JsonValue>> = T;
 
@@ -25,6 +26,13 @@ export type TgComponentsSessionData = {
   components?: Record<ComponentKey, TgComponentMetaState<any>>;
 };
 
+export type TgComponentsConversationData = {
+  components?: {
+    filter: MessageFilterQuery;
+    permanentId: string;
+  };
+};
+
 export type TgComponentsFlavor<C extends Context | undefined = undefined> = {
   components: {
     get: StateGetter;
@@ -33,7 +41,9 @@ export type TgComponentsFlavor<C extends Context | undefined = undefined> = {
   };
 } & (C extends Context
   ? C & SessionFlavor<TgComponentsSessionData>
-  : SessionFlavor<TgComponentsSessionData>);
+  : SessionFlavor<TgComponentsSessionData>) & {
+    conversationData?: TgComponentsConversationData;
+  };
 
 /**
  * Register the utility storage for TgComponents state in the session.

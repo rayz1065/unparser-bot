@@ -1,4 +1,4 @@
-import { Context } from 'grammy';
+import { Context, Filter, FilterQuery } from 'grammy';
 import { InlineKeyboardButton } from 'grammy/types';
 import { MaybeCallable, MaybePromise } from './maybe-callable';
 
@@ -36,7 +36,7 @@ export type TgStateProps<State extends TgStateBase> = {
 
 export type TgDefaultProps<State extends TgStateBase> = {
   getButton: TgButtonGetter;
-  listenForTextInput?: TextInputEventListener;
+  listenForMessageInput?: MessageInputEventListener;
 } & TgStateProps<State>;
 
 export type TgPropsBase<State extends TgStateBase> = Record<string, any> &
@@ -49,22 +49,26 @@ export type MaybeLazyProperty<T, State extends TgStateBase> = MaybeCallable<
 
 // events and handlers
 
-export type TextInputEventListener = (
-  permanentId: string
+export type MessageFilterQuery = FilterQuery &
+  ('message' | `message:${string}`);
+
+export type MessageInputEventListener = (
+  permanentId: string,
+  filter: MessageFilterQuery
 ) => MaybePromise<void>;
 
 export type HandlerFunction<T extends any[] = any[]> = (
   ...args: T
 ) => MaybePromise<void>;
 
+export type MessageHandlerFunction<
+  C extends Context,
+  T extends MessageFilterQuery,
+> = (ctx: Filter<C, T>) => MaybePromise<void>;
+
 export type HandlerData<T extends any[] = any[]> = {
   permanentId: string;
   handler: HandlerFunction<T>;
-};
-
-export type TextInputHandlerData<T extends any[] = any[]> = {
-  permanentId: string;
-  handler: HandlerFunction<[string, ...T]>;
 };
 
 // utils

@@ -38,7 +38,7 @@ export async function findFirstExpanded<T extends ExpandableComponentRecord>(
  * one is expanded it will be returned in `expanded`. The combined texts and
  * keyboards will be returned in `combined`.
  *
- * Works well together with `memorizeTextInputRequests`.
+ * Works well together with `memorizeMessageInputRequests`.
  *
  * Example:
  * ```ts
@@ -50,9 +50,9 @@ export async function findFirstExpanded<T extends ExpandableComponentRecord>(
  * });
  *
  * if (expanded) {
- *   const request = this.requestedTextInput[expanded.key];
+ *   const request = this.requestedMessageInput[expanded.key];
  *   if (request) {
- *     await this.listenForTextInput(request);
+ *     await this.listenForMessageInput(...request);
  *   }
  * }
  *

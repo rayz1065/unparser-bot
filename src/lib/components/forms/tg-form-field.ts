@@ -1,4 +1,4 @@
-import { Context } from 'grammy';
+import { Context, Filter } from 'grammy';
 import { TgComponent } from '../tg-components';
 import { escapeHtml } from '../utils';
 import { ExpandableComponent } from '../expandable-component';
@@ -132,7 +132,7 @@ export class TgFormField<T>
    * **NOTE**: an implementation is not offered, override the handler ot use.
    */
   public onTextInput(
-    text: string // eslint-disable-line @typescript-eslint/no-unused-vars
+    ctx: Filter<Context, 'message:text'> // eslint-disable-line @typescript-eslint/no-unused-vars
   ) {
     throw new Error('Method not implemented.');
   }

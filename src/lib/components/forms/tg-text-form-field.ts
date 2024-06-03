@@ -1,3 +1,4 @@
+import { Context, Filter } from 'grammy';
 import { TgFormField } from './tg-form-field';
 
 /**
@@ -10,7 +11,10 @@ export class TgTextFormField extends TgFormField<string> {
   /**
    * Called when text is received, updates the state and collapses the field.
    */
-  onTextInput(text: string) {
+  onTextInput(messageCtx: Filter<Context, 'message:text'>) {
+    const {
+      message: { text },
+    } = messageCtx;
     this.patchState({
       value: text,
     });

@@ -1,11 +1,12 @@
-import { Context } from 'grammy';
+import { Context, Filter } from 'grammy';
 import { MaybeCalled, MaybePromise, maybeCall } from './maybe-callable';
 import { stringifyHash } from './stringify-hash';
 import {
   HandlerData,
   HandlerFunction,
   MakeOptional,
-  TextInputEventListener,
+  MessageFilterQuery,
+  MessageInputEventListener,
   TgButtonGetter,
   TgDefaultProps,
   TgMessage,
@@ -26,9 +27,9 @@ export type GetStateType<T extends TgComponent<any, any, any>> =
  * - getState, setState, related to state management;
  * - getButton, a function that returns a button, when the button is called
  *   the parent component is tasked to call the respective handler;
- * - listenForTextInput, a function to be used in the rendering method if the
- *   component is expecting the user to write text in a message. See
- *   `memorizeTextInputRequests` for how this behavior can be customized.
+ * - listenForMessageInput, a function to be used in the rendering method if the
+ *   component is expecting the user to write a message. See
+ *   `memorizeMessageInputRequests` for how this behavior can be customized.
  */
 export abstract class TgComponent<
   State extends TgStateBase = null,
@@ -52,13 +53,16 @@ export abstract class TgComponent<
   private propsCacheState = '';
 
   /**
-   * If `memorizeTextInputRequests` is used, the (latest) request for each
+   * If `memorizeMessageInputRequests` is used, the (latest) request for each
    * child will be stored in this variable. It can then be used to decide
    * whether the child should have the request fulfilled.
    *
-   * See `this.memorizeTextInputRequests` for an example of usage.
+   * See `this.memorizeMessageInputRequests` for an example of usage.
    */
-  public requestedTextInput: Record<string, string> = {};
+  public requestedMessageInput: Record<
+    string,
+    Parameters<MessageInputEventListener>
+  > = {};
 
   constructor(public props: Props) {}
 
@@ -132,13 +136,30 @@ export abstract class TgComponent<
   }
 
   /**
-   * Register a listener for text input for the given handler.
+   * Register a listener for a message input for the given handler.
+   *
+   * Pass a filter to make sure the right update is received in your handler,
+   * for example `message:photo` for photos.
+   *
+   * You can also use `listenForTextInput`.
    */
-  public listenForTextInput(permanentId: string | HandlerData<[string]>) {
+  public listenForMessageInput<T extends MessageFilterQuery = 'message'>(
+    permanentId: string | HandlerData<[Filter<C, T>]>,
+    filter: T
+  ) {
     permanentId =
       typeof permanentId === 'string' ? permanentId : permanentId.permanentId;
 
-    return this.props.listenForTextInput?.(permanentId);
+    return this.props.listenForMessageInput?.(permanentId, filter);
+  }
+
+  /**
+   * Register a listener for a text message input for the given handler.
+   */
+  public listenForTextInput(
+    permanentId: string | HandlerData<[Filter<C, 'message:text'>]>
+  ) {
+    return this.listenForMessageInput(permanentId, 'message:text');
   }
 
   /**
@@ -286,21 +307,21 @@ export abstract class TgComponent<
    */
   public getEventProps(key: string): {
     getButton: TgButtonGetter;
-    listenForTextInput: TextInputEventListener;
+    listenForMessageInput: MessageInputEventListener;
   } {
     return {
       getButton: (text, handler, ...args) =>
         this.props.getButton(text, `${key}.${handler}`, ...args),
-      listenForTextInput: (permanentId) =>
-        this.listenForTextInput(`${key}.${permanentId}`),
+      listenForMessageInput: (permanentId, filter) =>
+        this.listenForMessageInput(`${key}.${permanentId}`, filter),
     };
   }
 
   /**
-   * Instead of transparently passing the listenForTextInput request to the
+   * Instead of transparently passing the listenForMessageInput request to the
    * parent you can control exactly how and when the text input requests are
    * allowed through. If a request is made by component `key`, the request will
-   * be found on `this.requestedTextInput[key]`.
+   * be found on `this.requestedMessageInput[key]`.
    *
    * This is useful when multiple children can request text inputs but some are
    * not rendered.
@@ -310,25 +331,25 @@ export abstract class TgComponent<
    * // constructor
    * this.makeChild('f', TgTextFormField, {
    *  label: 'Text field',
-   *  ...this.memorizeTextInputRequests('f'),
+   *  ...this.memorizeMessageInputRequests('f'),
    * });
    *
    * //...
    *
    * // render
    * const state = this.getState();
-   * const request = this.requestedTextInput[state.activeKey];
+   * const request = this.requestedMessageInput[state.activeKey];
    * if (request && state.enabled) {
-   *   await this.listenForTextInput(request);
+   *   await this.listenForMessageInput(...request);
    * }
    * ```
    */
-  public memorizeTextInputRequests(key: string): {
-    listenForTextInput?: TextInputEventListener;
+  public memorizeMessageInputRequests(key: string): {
+    listenForMessageInput?: MessageInputEventListener;
   } {
     return {
-      listenForTextInput: (permanentId) => {
-        this.requestedTextInput[key] = `${key}.${permanentId}`;
+      listenForMessageInput: (permanentId, filter) => {
+        this.requestedMessageInput[key] = [`${key}.${permanentId}`, filter];
       },
     };
   }

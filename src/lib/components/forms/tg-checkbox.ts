@@ -61,7 +61,7 @@ export class TgCheckbox
         getState: () => this.getState(),
         setState: (state) => this.setState(state),
         // no need to listen for text inputs
-        listenForTextInput: undefined,
+        listenForMessageInput: undefined,
       })
     );
 

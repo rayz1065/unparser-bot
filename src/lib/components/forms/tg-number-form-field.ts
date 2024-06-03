@@ -3,6 +3,7 @@ import { TgFormField, tgFormFieldDefaultProps } from './tg-form-field';
 import { GetPropsType, GetStateType, TgComponent } from '../tg-components';
 import { ExpandableComponent } from '../expandable-component';
 import { MakeOptional } from '../types';
+import { Context, Filter } from 'grammy';
 
 type NumberTgFormField = TgFormField<number>;
 const NumberTgFormField = TgFormField<number>;
@@ -90,7 +91,11 @@ export class TgNumberFormField
    * Called when a text input is passed. Will raise `EventRejectionError` if
    * the passed text is not a valid number (or a valid integer).
    */
-  public onTextInput(text: string) {
+  public onTextInput(messageCtx: Filter<Context, 'message:text'>) {
+    const {
+      message: { text },
+    } = messageCtx;
+
     const value = Number(text);
     if (isNaN(value)) {
       throw new EventRejectionError('tgc.errors.value-is-not-numeric', {

@@ -1,4 +1,8 @@
-import { InlineKeyboardButton, InlineKeyboardMarkup } from 'grammy/types';
+import {
+  InlineKeyboardButton,
+  InlineKeyboardMarkup,
+  LinkPreviewOptions,
+} from 'grammy/types';
 
 export function makeId(length: number) {
   const res = [];
@@ -24,6 +28,18 @@ export function ik(keyboard: InlineKeyboardButton[][]): {
   reply_markup: InlineKeyboardMarkup;
 } {
   return { reply_markup: { inline_keyboard: keyboard } };
+}
+
+export function previewOptions(options: LinkPreviewOptions): {
+  link_preview_options: LinkPreviewOptions;
+} {
+  return {
+    link_preview_options: options,
+  };
+}
+
+export function noPreview(): { link_preview_options: LinkPreviewOptions } {
+  return previewOptions({ is_disabled: true });
 }
 
 export function selectedBtnText(text: string, isMatched: boolean) {

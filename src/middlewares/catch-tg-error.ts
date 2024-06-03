@@ -14,7 +14,7 @@ export interface CatchTgErrorsOptions<T extends Context> {
     ctx: T,
     error: TgError,
     options: CatchTgErrorsOptions<T> | undefined
-  ) => void;
+  ) => void | Promise<void>;
 }
 
 export const catchTgErrors: <T extends Context & I18nFlavor>(
