@@ -2,7 +2,8 @@ import assert from 'assert';
 import { Api, Context } from 'grammy';
 import { InputMedia } from 'grammy/types';
 import {
-  MediaOther,
+  CaptionOther,
+  MediaType,
   MessageData,
   MessageDataMedia,
   OldMessageInfo,
@@ -18,7 +19,7 @@ import { getMessageInfo } from './message-info';
 /**
  * Creates the `other` parameter with the specified keys.
  *
- * For media use `makeMediaOther` instead, which deals with differently
+ * For media use `makeCaptionOther` instead, which deals with differently
  * specified entities and adds in text as caption if present.
  */
 export function makeOther<T extends (keyof Other)[]>(
@@ -37,13 +38,14 @@ export function makeOther<T extends (keyof Other)[]>(
 }
 
 /**
- * Creates the `other` parameter for a media, including `parse_mode`,
- * `entities`, `caption_entities`, and any other passed parameter.
+ * Creates the `other` parameter for a media, including `entities`,
+ * `caption_entities`, and any other passed parameter.
  */
-export function makeMediaOther<
-  T extends Exclude<keyof Other, 'parse_mode' | 'entities'>[],
->(messageData: MessageData, keys: T): MediaOther<T> {
-  const result = {} as MediaOther<T>;
+export function makeCaptionOther<T extends Exclude<keyof Other, 'entities'>[]>(
+  messageData: MessageData,
+  keys: T
+): CaptionOther<T> {
+  const result = {} as CaptionOther<T>;
 
   if ('entities' in messageData) {
     result.caption_entities = messageData.entities;
@@ -52,16 +54,26 @@ export function makeMediaOther<
     result.caption = messageData.text;
   }
 
-  return { ...result, ...makeOther(messageData, [...keys, 'parse_mode']) };
+  return { ...result, ...makeOther(messageData, keys) };
 }
 
 /**
  * Creates the input media, adding available properties
  */
 export function makeInputMedia(messageData: MessageDataMedia): InputMedia {
+  const other: Parameters<typeof makeCaptionOther>[1] = ['parse_mode'];
+
+  if (
+    (['animation', 'photo', 'video'] as MediaType[]).includes(
+      messageData.media.type
+    )
+  ) {
+    other.push('has_spoiler', 'show_caption_above_media');
+  }
+
   return {
     ...messageData.media,
-    ...makeMediaOther(messageData, ['has_spoiler']),
+    ...makeCaptionOther(messageData, other),
   };
 }
 
@@ -85,37 +97,51 @@ export async function sendMedia(
     'protect_content',
     'reply_markup',
     'reply_parameters',
+    'message_effect_id',
+    'parse_mode',
   ] as const satisfies (keyof Other)[];
 
   if (mediaType === 'photo') {
     return await api.sendPhoto(
       chatId,
       media,
-      makeMediaOther(messageData, [...defaultOther, 'has_spoiler'])
+      makeCaptionOther(messageData, [
+        ...defaultOther,
+        'has_spoiler',
+        'show_caption_above_media',
+      ])
     );
   } else if (mediaType === 'animation') {
     return await api.sendAnimation(
       chatId,
       media,
-      makeMediaOther(messageData, [...defaultOther, 'has_spoiler'])
+      makeCaptionOther(messageData, [
+        ...defaultOther,
+        'has_spoiler',
+        'show_caption_above_media',
+      ])
     );
   } else if (mediaType === 'audio') {
     return await api.sendAudio(
       chatId,
       media,
-      makeMediaOther(messageData, defaultOther)
+      makeCaptionOther(messageData, defaultOther)
     );
   } else if (mediaType === 'document') {
     return await api.sendDocument(
       chatId,
       media,
-      makeMediaOther(messageData, defaultOther)
+      makeCaptionOther(messageData, defaultOther)
     );
   } else if (mediaType === 'video') {
     return await api.sendVideo(
       chatId,
       media,
-      makeMediaOther(messageData, [...defaultOther, 'has_spoiler'])
+      makeCaptionOther(messageData, [
+        ...defaultOther,
+        'has_spoiler',
+        'show_caption_above_media',
+      ])
     );
   } else {
     throw new Error(`Unsupported media type: ${mediaType as string}`);
@@ -164,7 +190,7 @@ export async function editOrReplyMessage(
       // we can't remove the media, but we can still try changing the caption
       return await api.editMessageCaptionInline(
         inlineMessageId,
-        makeMediaOther(messageData, ['reply_markup'])
+        makeCaptionOther(messageData, ['reply_markup', 'parse_mode'])
       );
     } else {
       // we can simply edit the text
@@ -208,6 +234,7 @@ export async function editOrReplyMessage(
           'protect_content',
           'reply_markup',
           'reply_parameters',
+          'message_effect_id',
         ])
       );
       deleteStaleMessage(api, oldMessageInfo);
@@ -252,6 +279,7 @@ export async function editOrReplyMessage(
         'protect_content',
         'reply_markup',
         'reply_parameters',
+        'message_effect_id',
       ])
     );
   } else {

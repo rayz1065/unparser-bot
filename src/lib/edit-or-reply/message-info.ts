@@ -9,7 +9,8 @@ export function getMessageMediaInfo(message: Message): MessageMediaInfo | null {
   if (message.photo) {
     return {
       type: 'photo',
-      media: message.photo,
+      media: message.photo.at(-1)!,
+      sizes: message.photo,
       fileId: message.photo[0].file_id,
     };
   } else if (message.animation) {

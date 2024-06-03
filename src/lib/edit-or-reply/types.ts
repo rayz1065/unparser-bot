@@ -23,14 +23,13 @@ export type Other = {
   business_connection_id?: string;
   has_spoiler?: boolean;
   reply_parameters?: ReplyParameters;
+  message_effect_id?: string;
+  show_caption_above_media?: boolean;
 };
 
-export type MediaOther<
-  T extends Exclude<keyof Other, 'parse_mode' | 'entities'>[],
-> = {
+export type CaptionOther<T extends Exclude<keyof Other, 'entities'>[]> = {
   caption?: string;
   caption_entities?: MessageEntity[];
-  parse_mode?: ParseMode;
 } & { [K in T[number]]?: Other[K] };
 
 export type MessageDataMedia = {
@@ -53,7 +52,8 @@ export function messageDataHasMedia(
 export type MessageMediaInfo =
   | {
       type: 'photo';
-      media: PhotoSize[];
+      media: PhotoSize;
+      sizes: PhotoSize[];
       fileId: string;
     }
   | {
@@ -76,6 +76,8 @@ export type MessageMediaInfo =
       media: Video;
       fileId: string;
     };
+
+export type MediaType = MessageMediaInfo['type'];
 
 export type OldMessageInfoChatMessage = {
   hasMedia: boolean;
