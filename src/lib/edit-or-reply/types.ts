@@ -13,6 +13,21 @@ import {
 } from 'grammy/types';
 
 export type Other = {
+  keyboard?: InlineKeyboardButton[][];
+  parse_mode?: ParseMode;
+  entities?: MessageEntity[];
+  link_preview_options?: LinkPreviewOptions;
+  disable_notification?: boolean;
+  protect_content?: boolean;
+  message_thread_id?: number;
+  business_connection_id?: string;
+  has_spoiler?: boolean;
+  reply_parameters?: ReplyParameters;
+  message_effect_id?: string;
+  show_caption_above_media?: boolean;
+};
+
+export type TelegramOther = {
   reply_markup?: { inline_keyboard: InlineKeyboardButton[][] };
   parse_mode?: ParseMode;
   entities?: MessageEntity[];
@@ -25,6 +40,10 @@ export type Other = {
   reply_parameters?: ReplyParameters;
   message_effect_id?: string;
   show_caption_above_media?: boolean;
+
+  // caption
+  caption?: string;
+  caption_entities?: MessageEntity[];
 };
 
 export type CaptionOther<T extends Exclude<keyof Other, 'entities'>[]> = {

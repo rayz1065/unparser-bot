@@ -1,16 +1,11 @@
 import { Context, Filter, FilterQuery } from 'grammy';
 import { InlineKeyboardButton } from 'grammy/types';
 import { MaybeCallable, MaybePromise } from './maybe-callable';
+import { MessageData } from '../edit-or-reply/types';
 
 // messages
 
-type Other<C extends Context> = Parameters<C['api']['sendMessage']>[2];
-
-export interface TgMessage<C extends Context = Context> {
-  text: string;
-  keyboard?: InlineKeyboardButton[][];
-  other?: Omit<Other<C>, 'reply_markup'>;
-}
+export type TgMessage = MessageData;
 
 // state and props
 

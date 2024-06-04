@@ -214,7 +214,7 @@ export class TgPagination<T = any> extends TgComponent<State, Props<T>> {
     const page = await renderPage(elements, pageInfo);
 
     return {
-      text: page.text,
+      ...page,
       keyboard:
         paginationPosition === 'top'
           ? [...counter.keyboard, ...(page.keyboard ?? [])]

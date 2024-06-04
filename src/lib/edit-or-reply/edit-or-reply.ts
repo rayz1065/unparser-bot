@@ -2,14 +2,13 @@ import assert from 'assert';
 import { Api, Context } from 'grammy';
 import { InputMedia } from 'grammy/types';
 import {
-  CaptionOther,
   MediaType,
   MessageData,
   MessageDataMedia,
   OldMessageInfo,
   OldMessageInfoChat,
   OldMessageInfoChatMessage,
-  Other,
+  TelegramOther,
   messageDataHasMedia,
   oldMessageIsInline,
   oldMessageIsMessage,
@@ -18,19 +17,35 @@ import { getMessageInfo } from './message-info';
 
 /**
  * Creates the `other` parameter with the specified keys.
- *
- * For media use `makeCaptionOther` instead, which deals with differently
- * specified entities and adds in text as caption if present.
  */
-export function makeOther<T extends (keyof Other)[]>(
+export function makeOther<T extends (keyof TelegramOther)[]>(
   messageData: MessageData,
   keys: T
-): { [K in T[number]]?: Other[K] } {
-  const other: { [K in T[number]]?: Other[K] } = {};
+): Pick<TelegramOther, T[number]> {
+  const other = {} as Pick<TelegramOther, T[number]>;
+
+  const keysMap = {
+    caption: 'text',
+    caption_entities: 'entities',
+    reply_markup: 'keyboard',
+  } as const satisfies Record<
+    Exclude<keyof TelegramOther, keyof MessageData>,
+    keyof MessageData
+  >;
 
   keys.forEach((key: T[number]) => {
-    if (key in messageData && messageData[key]) {
-      other[key] = messageData[key] as any;
+    const remapped = (
+      key in keysMap ? keysMap[key as keyof typeof keysMap] : key
+    ) as keyof MessageData;
+
+    if (remapped in messageData && messageData[remapped]) {
+      if (remapped === 'keyboard') {
+        other[key] = {
+          inline_keyboard: messageData.keyboard,
+        } as any;
+      } else {
+        other[key] = messageData[remapped] as any;
+      }
     }
   });
 
@@ -38,30 +53,14 @@ export function makeOther<T extends (keyof Other)[]>(
 }
 
 /**
- * Creates the `other` parameter for a media, including `entities`,
- * `caption_entities`, and any other passed parameter.
- */
-export function makeCaptionOther<T extends Exclude<keyof Other, 'entities'>[]>(
-  messageData: MessageData,
-  keys: T
-): CaptionOther<T> {
-  const result = {} as CaptionOther<T>;
-
-  if ('entities' in messageData) {
-    result.caption_entities = messageData.entities;
-  }
-  if ('text' in messageData) {
-    result.caption = messageData.text;
-  }
-
-  return { ...result, ...makeOther(messageData, keys) };
-}
-
-/**
  * Creates the input media, adding available properties
  */
 export function makeInputMedia(messageData: MessageDataMedia): InputMedia {
-  const other: Parameters<typeof makeCaptionOther>[1] = ['parse_mode'];
+  const other: Parameters<typeof makeOther>[1] = [
+    'parse_mode',
+    'caption',
+    'caption_entities',
+  ];
 
   if (
     (['animation', 'photo', 'video'] as MediaType[]).includes(
@@ -73,7 +72,7 @@ export function makeInputMedia(messageData: MessageDataMedia): InputMedia {
 
   return {
     ...messageData.media,
-    ...makeCaptionOther(messageData, other),
+    ...makeOther(messageData, other),
   };
 }
 
@@ -99,13 +98,15 @@ export async function sendMedia(
     'reply_parameters',
     'message_effect_id',
     'parse_mode',
-  ] as const satisfies (keyof Other)[];
+    'caption',
+    'caption_entities',
+  ] as const satisfies (keyof TelegramOther)[];
 
   if (mediaType === 'photo') {
     return await api.sendPhoto(
       chatId,
       media,
-      makeCaptionOther(messageData, [
+      makeOther(messageData, [
         ...defaultOther,
         'has_spoiler',
         'show_caption_above_media',
@@ -115,7 +116,7 @@ export async function sendMedia(
     return await api.sendAnimation(
       chatId,
       media,
-      makeCaptionOther(messageData, [
+      makeOther(messageData, [
         ...defaultOther,
         'has_spoiler',
         'show_caption_above_media',
@@ -125,19 +126,19 @@ export async function sendMedia(
     return await api.sendAudio(
       chatId,
       media,
-      makeCaptionOther(messageData, defaultOther)
+      makeOther(messageData, defaultOther)
     );
   } else if (mediaType === 'document') {
     return await api.sendDocument(
       chatId,
       media,
-      makeCaptionOther(messageData, defaultOther)
+      makeOther(messageData, defaultOther)
     );
   } else if (mediaType === 'video') {
     return await api.sendVideo(
       chatId,
       media,
-      makeCaptionOther(messageData, [
+      makeOther(messageData, [
         ...defaultOther,
         'has_spoiler',
         'show_caption_above_media',
@@ -190,7 +191,12 @@ export async function editOrReplyMessage(
       // we can't remove the media, but we can still try changing the caption
       return await api.editMessageCaptionInline(
         inlineMessageId,
-        makeCaptionOther(messageData, ['reply_markup', 'parse_mode'])
+        makeOther(messageData, [
+          'reply_markup',
+          'parse_mode',
+          'caption',
+          'caption_entities',
+        ])
       );
     } else {
       // we can simply edit the text

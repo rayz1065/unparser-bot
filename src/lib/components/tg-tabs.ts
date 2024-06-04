@@ -113,11 +113,12 @@ export class TgTabs extends TgComponent<State, Props> {
 
     const text = includeNavbarTitle
       ? `${navbar.text}${renderedTab.text}`
-      : renderedTab.text;
+      : renderedTab.text ?? '';
 
     return {
+      ...renderedTab,
       text,
       keyboard: [...navbar.keyboard, ...(renderedTab.keyboard ?? [])],
-    };
+    } satisfies TgMessage;
   }
 }

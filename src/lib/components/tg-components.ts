@@ -66,7 +66,7 @@ export abstract class TgComponent<
 
   constructor(public props: Props) {}
 
-  public abstract render(): MaybePromise<TgMessage<C>>;
+  public abstract render(): MaybePromise<TgMessage>;
 
   public abstract getDefaultState(): State;
 
