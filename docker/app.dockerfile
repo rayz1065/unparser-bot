@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json package.json
 COPY yarn.lock yarn.lock
 
-RUN yarn install
+RUN yarn install --frozen-lockfile
 
 COPY .env .env
 COPY prisma prisma

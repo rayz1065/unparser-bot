@@ -7,6 +7,7 @@ import { AuthenticatedFlavor } from '../middlewares/authenticate';
 import { ConversationUtilsFlavor } from '../lib/conversations-utils';
 import { TgCallbackFlavor } from '../lib/tg-callback';
 import { TgComponentsFlavor } from '../lib/components/tg-components-middleware';
+import { EditOrReplyFlavor } from '../../../tg-components-plugin/out/types';
 
 export type MySessionData = Record<string, never>;
 
@@ -16,7 +17,8 @@ export type MyBaseContext = TgComponentsFlavor<
   SessionFlavor<MySessionData> &
   I18nFlavor &
   ConversationUtilsFlavor &
-  TgCallbackFlavor;
+  TgCallbackFlavor &
+  EditOrReplyFlavor;
 
 export type MyContext = MyBaseContext & StoredChatFlavor & AuthenticatedFlavor;
 

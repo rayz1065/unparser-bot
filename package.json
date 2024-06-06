@@ -6,7 +6,7 @@
     "build": "npx tsc",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "format": "prettier --write src/**/*.ts"
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
     "@grammyjs/conversations": "^1.2.0",
@@ -18,6 +18,7 @@
     "commander": "^12.1.0",
     "dayjs": "^1.11.9",
     "grammy": "^1.24.0",
+    "grammy-edit-or-reply": "^1.24.0",
     "nodemon": "^3.1.2"
   },
   "devDependencies": {

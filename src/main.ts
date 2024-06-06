@@ -9,6 +9,7 @@ import { i18n } from './i18n';
 import { storeTelegramChat } from './middlewares/store-telegram-chat';
 import { MyContext } from './types/grammy';
 import { tgComponentsMiddleware } from './lib/components/tg-components-middleware';
+import { editOrReplyMiddleware } from '../../tg-components-plugin/out/middleware';
 
 export function configureBot(bot: Bot<MyContext>) {
   bot.use(hydrateReply);
@@ -29,6 +30,7 @@ export function configureBot(bot: Bot<MyContext>) {
   bot.use(authenticate);
   bot.use(conversations());
   bot.use(tgComponentsMiddleware());
+  bot.use(editOrReplyMiddleware());
 
   // modules
   bot.use(mainMenuModule);

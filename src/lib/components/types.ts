@@ -1,7 +1,7 @@
 import { Context, Filter, FilterQuery } from 'grammy';
 import { InlineKeyboardButton } from 'grammy/types';
 import { MaybeCallable, MaybePromise } from './maybe-callable';
-import { MessageData } from '../edit-or-reply/types';
+import { MessageData } from 'grammy-edit-or-reply';
 
 // messages
 
