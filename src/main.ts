@@ -9,7 +9,7 @@ import { i18n } from './i18n';
 import { storeTelegramChat } from './middlewares/store-telegram-chat';
 import { MyContext } from './types/grammy';
 import { tgComponentsMiddleware } from './lib/components/tg-components-middleware';
-import { editOrReplyMiddleware } from '../../tg-components-plugin/out/middleware';
+import { editOrReplyMiddleware } from 'grammy-edit-or-reply';
 
 export function configureBot(bot: Bot<MyContext>) {
   bot.use(hydrateReply);
