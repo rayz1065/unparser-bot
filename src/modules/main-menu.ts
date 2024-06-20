@@ -5,7 +5,7 @@ import { TgCallbackComposer } from '../lib/tg-callback';
 
 export const mainMenuModule = new Composer<MyContext>();
 const _mainMenuModule = mainMenuModule.chatType(['private']);
-const _callbacksModule = new TgCallbackComposer<MyContext>('menu');
+const _callbacksModule = new TgCallbacksBag<MyContext>('menu');
 _mainMenuModule.use(_callbacksModule);
 
 _mainMenuModule.command('start', async (ctx) => {

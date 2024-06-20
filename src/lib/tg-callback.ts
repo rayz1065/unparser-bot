@@ -1,4 +1,11 @@
-import { Composer, Context, Filter, Middleware } from 'grammy';
+import {
+  Composer,
+  Context,
+  Filter,
+  Middleware,
+  MiddlewareFn,
+  NextFunction,
+} from 'grammy';
 import { InlineKeyboardButton } from 'grammy/types';
 import { splitWithTail } from './utils';
 
@@ -9,34 +16,36 @@ export type TgCallbackFlavor = {
 type LocalContext = Context & TgCallbackFlavor;
 
 type CallbackMiddleware<
-  S extends LocalContext,
+  C extends LocalContext,
   T extends unknown[],
 > = Middleware<
-  Omit<Filter<S, 'callback_query:data'>, 'callbackParams'> & {
+  Omit<Filter<C, 'callback_query:data'>, 'callbackParams'> & {
     callbackParams: T;
   }
 >;
 
-type TgCallbackMatchResult<S extends LocalContext, T extends unknown[]> = {
-  match: TgCallback<S, T>;
+type TgCallbackMatchResult<C extends LocalContext, T extends unknown[]> = {
+  match: TgCallback<C, T>;
   values: T;
 } | null;
 
-interface TgCallbackMatchable<S extends LocalContext, T extends unknown[]> {
-  match(cbData: string): TgCallbackMatchResult<S, T>;
+interface TgCallbackMatchable<C extends LocalContext, T extends unknown[]> {
+  match(cbData: string): TgCallbackMatchResult<C, T>;
 }
 
 /**
- * creates a callback with a prefix and some params
+ * Creates a callback with a prefix and the specified parameters.
+ *
+ * You should use `TgCallbacksBag` to manage your callbacks.
  */
-export class TgCallback<S extends LocalContext, T extends unknown[] = never[]>
-  implements TgCallbackMatchable<S, T>
+export class TgCallback<C extends LocalContext, T extends unknown[] = never[]>
+  implements TgCallbackMatchable<C, T>
 {
-  public middleware: CallbackMiddleware<S, T>[];
+  public middleware: CallbackMiddleware<C, T>[];
 
   public constructor(
     private prefix: string,
-    ...middleware: CallbackMiddleware<S, T>[]
+    ...middleware: CallbackMiddleware<C, T>[]
   ) {
     if (this.prefix.indexOf('.') !== -1) {
       throw new Error("TgCallback prefix may not contain '.'");
@@ -84,28 +93,44 @@ export class TgCallback<S extends LocalContext, T extends unknown[] = never[]>
 }
 
 /**
- * A composer dedicated to storing multiple instances of TgCallback.
- * The composer will automatically register any created TgCallback.
+ * Sourced from https://github.com/grammyjs/grammY/blob/main/src/composer.ts
  */
-export class TgCallbackComposer<S extends LocalContext>
-  extends Composer<S>
-  implements TgCallbackMatchable<S, unknown[]>
-{
-  private callbacks: TgCallback<S, any>[] = [];
+function flatten<C extends Context>(mw: Middleware<C>): MiddlewareFn<C> {
+  return typeof mw === 'function'
+    ? mw
+    : (ctx, next) => mw.middleware()(ctx, next);
+}
 
-  public constructor(
-    private prefix: string,
-    ...middleware: Middleware<S>[]
-  ) {
-    super(...middleware);
+/**
+ * Class to store, create, and register a list of tg callbacks.
+ *
+ * Example:
+ * ```
+ * const callbacksBag = new TgCallbacksBag<MyContext>('bag-id');
+ * bot.use(callbacksBag);
+ *
+ * const menuCb = callbacksBag.makeCallback('menu', async (ctx) => {
+ *   await ctx.answerCallbackQuery("Hello world!");
+ * })
+ * ```
+ *
+ * **NOTE**: the middleware will consume all callbacks matched by the bag,
+ * i.e. callbacks in the format `${prefix}.${callbackId}` where `callbackId`
+ * is the id of one of the child callbacks, make sure that callbacks of this
+ * form are not used anywhere else.
+ */
+export class TgCallbacksBag<C extends LocalContext> {
+  private callbacks: TgCallback<C, any>[] = [];
 
+  public constructor(private prefix: string) {
     if (this.prefix.indexOf('.') !== -1) {
-      throw new Error("TgCallbackComposer prefix may not contain '.'");
+      throw new Error("TgCallbackBag prefix may not contain '.'");
     }
-
-    super.on('callback_query:data').lazy(this.lazyMatchCallback.bind(this));
   }
 
+  /**
+   * Finds a TgCallback matching the data within the bag or returns `null`.
+   */
   public match(cbData: string) {
     const sections = splitWithTail(cbData, '.', 2);
     if (sections.length !== 2) {
@@ -127,20 +152,6 @@ export class TgCallbackComposer<S extends LocalContext>
     return null;
   }
 
-  private lazyMatchCallback(ctx: S) {
-    const cbData = ctx.callbackQuery?.data ?? '';
-    const result = this.match(cbData);
-
-    if (!result) {
-      return [];
-    }
-
-    const { match, values } = result;
-
-    ctx.callbackParams = values;
-    return match.middleware;
-  }
-
   /**
    * Creates, stores, and returns a TgCallback.
    * The created TgCallback will be edited so that getCb contains the prefix,
@@ -148,9 +159,9 @@ export class TgCallbackComposer<S extends LocalContext>
    */
   public makeCallback<T extends unknown[] = never[]>(
     prefix: string,
-    ...middleware: CallbackMiddleware<S, T>[]
+    ...middleware: CallbackMiddleware<C, T>[]
   ) {
-    const callback = new TgCallback<S, T>(prefix, ...middleware);
+    const callback = new TgCallback<C, T>(prefix, ...middleware);
 
     const oldGetCb = callback.getCb.bind(callback);
     callback.getCb = (values: T) => this.prefix + '.' + oldGetCb(values);
@@ -160,7 +171,37 @@ export class TgCallbackComposer<S extends LocalContext>
     return callback;
   }
 
+  /**
+   * Updates the prefix, must be used before any call to getBtn or getCb.
+   */
   public setPrefix(prefix: string) {
     this.prefix = prefix;
+  }
+
+  /**
+   * Register a middleware for your callbacks, simply call
+   * `bot.use(callbacksBag)` to register all the callbacks in the bag.
+   */
+  public middleware() {
+    return async (ctx: C, next: NextFunction) => {
+      if (ctx.callbackQuery?.data === undefined) {
+        return next();
+      }
+
+      const cbData = ctx.callbackQuery.data;
+      const result = this.match(cbData);
+
+      if (!result) {
+        return next();
+      }
+
+      const { match, values } = result;
+
+      ctx.callbackParams = values;
+
+      return await flatten(
+        new Composer<Filter<C, 'callback_query:data'>>(...match.middleware)
+      )(ctx as Filter<C, 'callback_query:data'>, next);
+    };
   }
 }

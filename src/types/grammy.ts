@@ -7,7 +7,7 @@ import { AuthenticatedFlavor } from '../middlewares/authenticate';
 import { ConversationUtilsFlavor } from '../lib/conversations-utils';
 import { TgCallbackFlavor } from '../lib/tg-callback';
 import { TgComponentsFlavor } from '../lib/components/tg-components-middleware';
-import { EditOrReplyFlavor } from '../../../tg-components-plugin/out/types';
+import { EditOrReplyFlavor } from 'grammy-edit-or-reply';
 
 export type MySessionData = Record<string, never>;
 

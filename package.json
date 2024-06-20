@@ -18,7 +18,7 @@
     "commander": "^12.1.0",
     "dayjs": "^1.11.9",
     "grammy": "^1.24.0",
-    "grammy-edit-or-reply": "^1.24.0",
+    "grammy-edit-or-reply": "^1.1.1",
     "nodemon": "^3.1.2"
   },
   "devDependencies": {
