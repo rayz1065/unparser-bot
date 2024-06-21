@@ -68,7 +68,8 @@ export type HandlerData<T extends any[] = any[]> = {
 
 // utils
 
-export type MakeOptional<
-  T extends Record<any, any>,
-  K extends string | number | symbol,
-> = Omit<T, K> & Partial<Pick<T, K>>;
+export type MakeOptional<T extends Record<any, any>, K extends keyof T> = Omit<
+  T,
+  K
+> &
+  Partial<Pick<T, K>>;

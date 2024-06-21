@@ -104,10 +104,10 @@
   resolved "https://registry.yarnpkg.com/@grammyjs/storage-prisma/-/storage-prisma-2.4.2.tgz#3cae7ced872da24ba3350181d3393de75879c461"
   integrity sha512-//NiwgiKiBHkz5+nBMBFarCpqWXaXmuCGqHYsnCXAjGecVB81Nb43NgA2CKSUaWn4hrLBnnLMaitwDci6EZc3g==
 
-"@grammyjs/types@3.8.0":
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/@grammyjs/types/-/types-3.8.0.tgz#56b9a7bd55302eda025fbac74fdae1ac2f464863"
-  integrity sha512-5r2rUJ/s939iQEt6j2gyl1owbWwKAYAg2gQH7FfWIP1swL2assZ97vRUl8cBU3UEp7es9c/VioWeQjKbV6g4eg==
+"@grammyjs/types@3.9.0":
+  version "3.9.0"
+  resolved "https://registry.yarnpkg.com/@grammyjs/types/-/types-3.9.0.tgz#dff605d2b0cd257318ec8968df3f8f81f7c66dc7"
+  integrity sha512-QzZAbz5COBZnDlDs6x94TIIIH5Pi7AMk0rJPM2O5JAz5Q+s7Xxp3lGg/pWyiVR9Q8euRDYCJmDtcRjwwFD6a3g==
 
 "@humanwhocodes/config-array@^0.11.14":
   version "0.11.14"
@@ -754,12 +754,12 @@ grammy-edit-or-reply@^1.1.1:
   resolved "https://registry.yarnpkg.com/grammy-edit-or-reply/-/grammy-edit-or-reply-1.1.1.tgz#4e837e395c59423ecc90294c687ad5a1cd2a8121"
   integrity sha512-TF+csZkC9utNpxFXeuyDUZ8QEZDm1xvFcQBjUXBQPhk8wpFUqgSGstwZ3Gmtz14lvkRkFElm9dFuFY2sl02Ucw==
 
-grammy@^1.24.0:
-  version "1.24.1"
-  resolved "https://registry.yarnpkg.com/grammy/-/grammy-1.24.1.tgz#2b0e3a54fa2125f7d76982cd00131e0cae341ea4"
-  integrity sha512-0ijKmqL1wlxIk+Zml4qZDXTbacWFf9IEmTPAjvNpl5jpaarkE7SOxst1gDb0ZmySAPimzvP2vH4rc0IhwexSOA==
+grammy@^1.25.0:
+  version "1.25.0"
+  resolved "https://registry.yarnpkg.com/grammy/-/grammy-1.25.0.tgz#4baa4d70b9c1ec05a1d5c8ffa5cd99178cfef6ec"
+  integrity sha512-aAPfv/uCAf2pxFJQMhI7242G8dvwFBSYbWiuyu5qfWczj9Xn25/FeyC/7KlyXRMTHDYcHI4lRwpe5z/+nsDrXg==
   dependencies:
-    "@grammyjs/types" "3.8.0"
+    "@grammyjs/types" "3.9.0"
     abort-controller "^3.0.0"
     debug "^4.3.4"
     node-fetch "^2.7.0"

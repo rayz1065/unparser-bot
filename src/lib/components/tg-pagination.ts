@@ -53,14 +53,17 @@ export function renderAsButtonsGrid<T>({
   renderElement,
 }: {
   columns: number;
-  renderElement: (element: T) => {
+  renderElement: (
+    element: T,
+    index: number
+  ) => {
     button: InlineKeyboardButton;
     text?: string;
   };
 }): PageRenderer<T> {
   return async (elements: T[]) => {
     const items = await Promise.all(
-      elements.map(async (element) => renderElement(element))
+      elements.map(async (element, index) => renderElement(element, index))
     );
 
     return {
