@@ -13,11 +13,16 @@ import {
   worksInGroups,
 } from '../config';
 import { i18n } from '../i18n';
+import { LanguageCode } from 'grammy/types';
 
-const availableLocales = [
+const availableLocales: {
+  locale: string;
+  languageCode: LanguageCode | undefined;
+  name: string;
+}[] = [
   ...i18n.locales.map((locale) => ({
     locale,
-    languageCode: locale,
+    languageCode: locale as LanguageCode,
     name: locale,
   })),
   {
@@ -26,7 +31,7 @@ const availableLocales = [
     name: 'default',
   },
 ];
-const localesToUpdate: (typeof availableLocales)[number][] = [];
+const localesToUpdate: typeof availableLocales = [];
 
 program
   .option('--name', 'Update the name of the bot')
@@ -193,9 +198,8 @@ async function main() {
   }
 
   if (options.lang) {
-    localesToUpdate.push(
-      availableLocales.find((x) => x.name === options.lang)!
-    );
+    const lang = options.lang as LanguageCode | 'default';
+    localesToUpdate.push(availableLocales.find((x) => x.name === lang)!);
   } else {
     localesToUpdate.push(...availableLocales);
   }
