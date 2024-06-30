@@ -17,8 +17,9 @@
     "base-x": "^4.0.0",
     "commander": "^12.1.0",
     "dayjs": "^1.11.9",
-    "grammy": "^1.25.0",
+    "grammy": "^1.25.2",
     "grammy-edit-or-reply": "^1.1.1",
+    "grammy-tg-components": "^0.0.1",
     "nodemon": "^3.1.2"
   },
   "devDependencies": {

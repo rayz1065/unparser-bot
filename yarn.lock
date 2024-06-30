@@ -489,7 +489,7 @@ cross-spawn@^7.0.2:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
-dayjs@^1.11.9:
+dayjs@^1.11.11, dayjs@^1.11.9:
   version "1.11.11"
   resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.11.11.tgz#dfe0e9d54c5f8b68ccf8ca5f72ac603e7e5ed59e"
   integrity sha512-okzr3f11N6WuqYtZSvm+F776mB41wRZMhKP+hc34YdW+KmtYYK9iqvHSwo2k9FEH3fhGXvOPV6yz2IcSrfRUDg==
@@ -754,10 +754,17 @@ grammy-edit-or-reply@^1.1.1:
   resolved "https://registry.yarnpkg.com/grammy-edit-or-reply/-/grammy-edit-or-reply-1.1.1.tgz#4e837e395c59423ecc90294c687ad5a1cd2a8121"
   integrity sha512-TF+csZkC9utNpxFXeuyDUZ8QEZDm1xvFcQBjUXBQPhk8wpFUqgSGstwZ3Gmtz14lvkRkFElm9dFuFY2sl02Ucw==
 
-grammy@^1.25.0:
-  version "1.25.0"
-  resolved "https://registry.yarnpkg.com/grammy/-/grammy-1.25.0.tgz#4baa4d70b9c1ec05a1d5c8ffa5cd99178cfef6ec"
-  integrity sha512-aAPfv/uCAf2pxFJQMhI7242G8dvwFBSYbWiuyu5qfWczj9Xn25/FeyC/7KlyXRMTHDYcHI4lRwpe5z/+nsDrXg==
+grammy-tg-components@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/grammy-tg-components/-/grammy-tg-components-0.0.1.tgz#442d84bbbb40d5fee9abf35fe1223386e468cd06"
+  integrity sha512-3DAQEtDMgXoC+aCCVjXOaSJzhl9LyfGEgrsL0ZHg8nUBN3kV3fvFqpkMMUbrHACSTiz3+iGRqxVHSToUnY4Plw==
+  dependencies:
+    dayjs "^1.11.11"
+
+grammy@^1.25.2:
+  version "1.25.2"
+  resolved "https://registry.yarnpkg.com/grammy/-/grammy-1.25.2.tgz#6efd5d9df9128bcf66757ea0b050a65542114b5c"
+  integrity sha512-i1NCr2B8d5/hEHbIzqwG/1+JmIY63xVcBPCyciJB88BYKlXKsM42v5dfRVGf7AYyPxL07Em0qk42Z6YJIqR3HQ==
   dependencies:
     "@grammyjs/types" "3.9.0"
     abort-controller "^3.0.0"

@@ -1,7 +1,7 @@
 import { Composer } from 'grammy';
 import { ik } from '../lib/utils';
 import { MyContext } from '../types/grammy';
-import { TgCallbackComposer } from '../lib/tg-callback';
+import { TgCallbacksBag } from 'grammy-tg-components';
 
 export const mainMenuModule = new Composer<MyContext>();
 const _mainMenuModule = mainMenuModule.chatType(['private']);

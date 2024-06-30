@@ -4,9 +4,8 @@ import { ParseModeFlavor } from '@grammyjs/parse-mode';
 import { Context, SessionFlavor } from 'grammy';
 import { StoredChatFlavor } from '../middlewares/store-telegram-chat';
 import { AuthenticatedFlavor } from '../middlewares/authenticate';
-import { ConversationUtilsFlavor } from '../lib/conversations-utils';
-import { TgCallbackFlavor } from '../lib/tg-callback';
-import { TgComponentsFlavor } from '../lib/components/tg-components-middleware';
+import { TgCallbackFlavor } from 'grammy-tg-components';
+import { TgComponentsFlavor } from 'grammy-tg-components';
 import { EditOrReplyFlavor } from 'grammy-edit-or-reply';
 
 export type MySessionData = Record<string, never>;
@@ -16,7 +15,6 @@ export type MyBaseContext = TgComponentsFlavor<
 > &
   SessionFlavor<MySessionData> &
   I18nFlavor &
-  ConversationUtilsFlavor &
   TgCallbackFlavor &
   EditOrReplyFlavor;
 
