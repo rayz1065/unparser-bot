@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
 
 // add any missing includes here
-const telegramChatInclude: Prisma.TelegramChatInclude = {} as const;
+const telegramChatInclude = {} as const satisfies Prisma.TelegramChatInclude;
 
 // compute the result of including the above
 type ChatIncludeResult<T extends Prisma.TelegramChatInclude> = Awaited<
