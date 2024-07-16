@@ -6,7 +6,7 @@ import { I18nFlavor } from '@grammyjs/i18n';
 // add any missing includes here
 const userInclude: Prisma.UserInclude = {
   telegram_chat: true,
-} as const;
+} as const satisfies Prisma.UserInclude;
 
 // compute the result of including the above
 type UserIncludeResult<T extends Prisma.UserInclude> = Awaited<
