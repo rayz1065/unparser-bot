@@ -9,7 +9,6 @@ COPY yarn.lock yarn.lock
 
 RUN yarn install --frozen-lockfile
 
-COPY .env .env
 COPY prisma prisma
 
 RUN npx prisma generate
