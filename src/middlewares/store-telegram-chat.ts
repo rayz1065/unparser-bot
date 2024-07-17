@@ -1,6 +1,7 @@
 import { Context, Middleware } from 'grammy';
 import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
+import { Chat } from 'grammy/types';
 
 // add any missing includes here
 const telegramChatInclude = {} as const satisfies Prisma.TelegramChatInclude;
@@ -16,12 +17,7 @@ export type StoredChatFlavor = {
   dbChat: TelegramChatWithIncludes;
 };
 
-export async function getChatFromUpdate(ctx: Context) {
-  if (!ctx.chat) {
-    throw new Error('Ctx does not have a chat field');
-  }
-
-  const chat = ctx.chat;
+export async function upsertTelegramChat(chat: Chat) {
   let updateData: Prisma.TelegramChatCreateInput = {
     type: chat.type,
     title: null,
@@ -75,7 +71,15 @@ export async function getChatFromUpdate(ctx: Context) {
     });
   }
 
-  return dbChat;
+  return { chat: dbChat };
+}
+
+export async function getChatFromUpdate(ctx: Context) {
+  if (!ctx.chat) {
+    throw new Error('Ctx does not have a chat field');
+  }
+
+  return upsertTelegramChat(ctx.chat);
 }
 
 export const storeTelegramChat: Middleware<Context & StoredChatFlavor> = async (
@@ -83,7 +87,8 @@ export const storeTelegramChat: Middleware<Context & StoredChatFlavor> = async (
   next
 ) => {
   if (ctx.chat) {
-    ctx.dbChat = await getChatFromUpdate(ctx);
+    const { chat } = await getChatFromUpdate(ctx);
+    ctx.dbChat = chat;
   }
 
   await next();

@@ -2,9 +2,10 @@ import { Context, Middleware } from 'grammy';
 import { prisma } from '../prisma';
 import { Prisma } from '@prisma/client';
 import { I18nFlavor } from '@grammyjs/i18n';
+import { User } from 'grammy/types';
 
 // add any missing includes here
-const userInclude: Prisma.UserInclude = {
+const userInclude = {
   telegram_chat: true,
 } as const satisfies Prisma.UserInclude;
 
@@ -19,27 +20,29 @@ export interface AuthenticatedFlavor {
   dbUser: UserWithIncludes;
 }
 
-export async function getUserFromUpdate(ctx: Context) {
-  if (!ctx.from) {
-    throw new Error('Ctx does not have a from field');
-  }
-
-  const isPersonalChatOpenUpdate =
-    ctx.chat?.id === ctx.from.id ? true : undefined; // don't update if not needed
-
-  const from = ctx.from;
-  let user: UserWithIncludes;
+/**
+ * Get the user based on the `from` received from telegram. The value of
+ * `isPersonalChatOpenUpdate` will be used to fill the corresponding field in
+ * the database. If `undefined` is passed:
+ * - on update, no update is performed
+ * - on creation, value is defaulted to `false`.
+ */
+export async function upsertUser(
+  user: User,
+  isPersonalChatOpenUpdate: boolean | undefined = undefined
+) {
+  let dbUser: UserWithIncludes;
   const updateData = {
-    is_bot: from.is_bot,
-    is_premium: from.is_premium ?? false,
-    added_to_attachment_menu: from.added_to_attachment_menu ?? false,
-    telegram_language_code: from.language_code ?? null,
+    is_bot: user.is_bot,
+    is_premium: user.is_premium ?? false,
+    added_to_attachment_menu: user.added_to_attachment_menu ?? false,
+    telegram_language_code: user.language_code ?? null,
     is_personal_chat_open: isPersonalChatOpenUpdate,
   } as const satisfies Prisma.UserUpdateInput;
 
   try {
-    user = await prisma.user.update({
-      where: { telegram_chat_id: from.id },
+    dbUser = await prisma.user.update({
+      where: { telegram_chat_id: user.id },
       data: updateData,
       include: userInclude,
     });
@@ -51,13 +54,13 @@ export async function getUserFromUpdate(ctx: Context) {
         updateData.telegram_language_code ?? process.env.DEFAULT_LOCALE ?? 'en',
       telegram_chat: {
         connectOrCreate: {
-          where: { id: from.id },
+          where: { id: user.id },
           create: {
-            id: from.id,
+            id: user.id,
             type: 'private',
-            first_name: from.first_name,
-            last_name: from.last_name,
-            username: from.username,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            username: user.username,
             is_forum: null,
             title: null,
           },
@@ -65,20 +68,32 @@ export async function getUserFromUpdate(ctx: Context) {
       },
     };
 
-    user = await prisma.user.create({
+    dbUser = await prisma.user.create({
       data: createData,
       include: userInclude,
     });
   }
 
-  return user;
+  return { user: dbUser };
+}
+
+export async function getUserFromUpdate(ctx: Context) {
+  if (!ctx.from) {
+    throw new Error('Ctx does not have a from field');
+  }
+
+  const isPersonalChatOpenUpdate =
+    ctx.chat?.id === ctx.from.id ? true : undefined; // don't update if not needed
+
+  return upsertUser(ctx.from, isPersonalChatOpenUpdate);
 }
 
 export const authenticate: Middleware<
   Context & AuthenticatedFlavor & I18nFlavor
 > = async (ctx, next) => {
   if (ctx.from) {
-    ctx.dbUser = await getUserFromUpdate(ctx);
+    const { user } = await getUserFromUpdate(ctx);
+    ctx.dbUser = user;
     await ctx.i18n.renegotiateLocale();
   }
 
