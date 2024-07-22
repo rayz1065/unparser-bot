@@ -1,8 +1,7 @@
 import { Bot } from 'grammy';
 import { MyContext } from './types/grammy';
+import { parseMode } from '@grammyjs/parse-mode';
+import { appConfig } from './config';
 
-if (!process.env.BOT_TOKEN) {
-  throw new Error('Bot token not found');
-}
-
-export const bot = new Bot<MyContext>(process.env.BOT_TOKEN);
+export const bot = new Bot<MyContext>(appConfig.BOT_TOKEN);
+bot.api.config.use(parseMode('HTML'));

@@ -1,5 +1,5 @@
 import { Bot, session } from 'grammy';
-import { hydrateReply, parseMode } from '@grammyjs/parse-mode';
+import { hydrateReply } from '@grammyjs/parse-mode';
 import { conversations } from '@grammyjs/conversations';
 import { authenticate } from './middlewares/authenticate';
 import { PrismaAdapter } from '@grammyjs/storage-prisma';
@@ -13,8 +13,6 @@ import { tgComponentsMiddleware } from 'grammy-tg-components';
 import { mainMenuModule } from './modules/main-menu';
 
 export function configureBot(bot: Bot<MyContext>) {
-  bot.use(hydrateReply);
-  bot.api.config.use(parseMode('HTML'));
   bot.use(
     session({
       initial: () => ({}),
@@ -22,10 +20,7 @@ export function configureBot(bot: Bot<MyContext>) {
     })
   );
 
-  bot.errorBoundary((err) => {
-    console.error(err);
-  });
-
+  bot.use(hydrateReply);
   bot.use(i18n);
   bot.use(storeTelegramChat);
   bot.use(authenticate);

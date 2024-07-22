@@ -3,6 +3,7 @@ import { prisma } from '../prisma';
 import { Prisma } from '@prisma/client';
 import { I18nFlavor } from '@grammyjs/i18n';
 import { User } from 'grammy/types';
+import { appConfig } from '../config';
 
 // add any missing includes here
 const userInclude = {
@@ -50,8 +51,7 @@ export async function upsertUser(
     const createData: Prisma.UserCreateInput = {
       ...updateData,
       is_personal_chat_open: updateData.is_personal_chat_open ?? false,
-      language:
-        updateData.telegram_language_code ?? process.env.DEFAULT_LOCALE ?? 'en',
+      language: updateData.telegram_language_code ?? appConfig.DEFAULT_LOCALE,
       telegram_chat: {
         connectOrCreate: {
           where: { id: user.id },

@@ -1,5 +1,10 @@
 import { PollingOptions } from 'grammy';
-import { BotCommandScope, ChatAdministratorRights } from 'grammy/types';
+import {
+  BotCommandScope,
+  ChatAdministratorRights,
+  LanguageCode,
+} from 'grammy/types';
+import z from 'zod';
 
 /**
  * The setup script will read the following items from translation files:
@@ -110,9 +115,43 @@ export function setupGuideManualSteps() {
   ];
 }
 
+/**
+ * Properties that must be set through BotFather
+ */
 export const botProperties = {
   can_join_groups: worksInGroups,
   can_read_all_group_messages: false,
   supports_inline_queries: true,
   can_connect_to_business: false,
 } as const;
+
+/**
+ * A list of supported locales
+ */
+export const supportedLocales = ['it', 'en'] as const satisfies LanguageCode[];
+
+/**
+ * Creates the config for the app by parsing the env
+ */
+function getAppConfig(env: NodeJS.ProcessEnv) {
+  const res = z
+    .object({
+      TZ: z.string(),
+      BOT_TOKEN: z.string(),
+      ADMIN_USER_IDS: z.preprocess(
+        (x) => JSON.parse(String(x)),
+        z.array(z.number())
+      ),
+      DEFAULT_LOCALE: z.enum(supportedLocales).default('en'),
+    })
+    .parse(env);
+
+  if (res.ADMIN_USER_IDS.length === 0) {
+    console.warn('Config warning: ADMIN_USER_IDS is empty');
+  }
+
+  return res;
+}
+
+export type AppConfig = ReturnType<typeof getAppConfig>;
+export const appConfig = getAppConfig(process.env);

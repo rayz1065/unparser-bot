@@ -1,24 +1,20 @@
 import { Context, Middleware } from 'grammy';
+import { appConfig } from '../config';
 
 export function isAdmin(ctx: Context): boolean {
   const userId = ctx.from?.id;
   if (!userId) {
     return false;
   }
-  const adminUserId = process.env.ADMIN_USER_ID;
-  if (!adminUserId) {
-    return false;
-  }
-  return userId === +adminUserId;
+  const adminUserIds = appConfig.ADMIN_USER_IDS;
+
+  return adminUserIds.includes(userId);
 }
 
-export const ensureAdmin: Middleware<Context> = async (ctx, next) => {
-  const userId = ctx.from?.id;
-  if (!userId) {
-    return;
-  }
-  const adminUserId = process.env.ADMIN_USER_ID;
-  if (adminUserId && userId === +adminUserId) {
-    await next();
-  }
-};
+export function ensureAdmin(): Middleware<Context> {
+  return (ctx, next) => {
+    if (isAdmin(ctx)) {
+      return next();
+    }
+  };
+}

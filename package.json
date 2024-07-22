@@ -20,7 +20,8 @@
     "grammy": "^1.27.0",
     "grammy-edit-or-reply": "^1.1.1",
     "grammy-tg-components": "^0.0.1",
-    "nodemon": "^3.1.4"
+    "nodemon": "^3.1.4",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",

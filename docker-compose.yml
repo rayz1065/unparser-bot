@@ -29,7 +29,7 @@ services:
       - TZ=${TZ}
       - BOT_TOKEN=${BOT_TOKEN}
       - DEFAULT_LOCALE=${DEFAULT_LOCALE}
-      - ADMIN_USER_ID=${ADMIN_USER_ID}
+      - ADMIN_USER_IDS=${ADMIN_USER_IDS}
       - DATABASE_URL=${DATABASE_URL}
 
 volumes:
