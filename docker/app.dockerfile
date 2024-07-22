@@ -1,4 +1,4 @@
-FROM node:20 as dev
+FROM node:20 AS dev
 
 USER node
 
@@ -13,7 +13,7 @@ COPY prisma prisma
 
 RUN npx prisma generate
 
-ENV env development
+ENV NODE_ENV=development
 
 CMD ["npm", "start"]
 
@@ -21,6 +21,6 @@ FROM dev as prod
 
 COPY . .
 
-ENV env production
+ENV NODE_ENV=production
 
 CMD ["npx", "ts-node", "/app/src/bin/run.ts"]
