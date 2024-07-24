@@ -17,7 +17,7 @@ ENV NODE_ENV=development
 
 CMD ["npm", "start"]
 
-FROM dev as prod
+FROM dev AS prod
 
 COPY . .
 
