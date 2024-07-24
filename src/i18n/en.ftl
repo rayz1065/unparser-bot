@@ -46,7 +46,7 @@ info-message =
     ℹ️ <b>About this bot</b>
 
     📦 <b>Source code</>: {-source}
-    🛠 Built using <a href="https://grammy.dev">Grammy</>
+    🛠 Built using <a href="https://grammy.dev">grammY</>
     📚 <b>Documentation</>: <a href="https://core.telegram.org/bots/api#formatting-options">Formatting options</>
     🧑‍💻 <b>Developer</>: {-bot-creator}
     📄 <b>License</>: <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPL-3.0-or-later</>
