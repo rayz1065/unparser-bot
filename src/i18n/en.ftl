@@ -15,6 +15,12 @@ bot-short-description = Convert Telegram messages to html and markdown
 bot-description = 
     Convert Telegram messages to html and markdown
 
+    • 💬 → 🌐 /html <message>
+    • 💬 → ⬇️ /md <message>
+
+    • 🌐 → 💬 /phtml <message>
+    • ⬇️ → 💬 /pmd <message>
+
     🧑‍💻 Dev: {-bot-creator}
     📦 Source: {-source}
 
