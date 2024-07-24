@@ -43,7 +43,7 @@ welcome =
     • 🌐 → 💬 /phtml &lt;message&gt;
     • ⬇️ → 💬 /pmd &lt;message&gt;
 
-    <i>You might need to send your text as code to avoid your Telegram client to pre-parse it for you</>
+    <i>You might need to send your text as code to prevent your Telegram client from pre-parsing it for you</>
 
     ↩️ You can also use all these commands <b>in reply to</> the message to (un)parse
 
