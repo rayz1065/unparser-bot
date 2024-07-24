@@ -22,7 +22,11 @@ import z from 'zod';
  * `cmd-description-${command}`
  */
 export const myCommands: { command: string; scope?: BotCommandScope }[] = [
-  { command: 'start' },
+  { command: 'start', scope: { type: 'all_private_chats' } },
+  { command: 'html' },
+  { command: 'phtml' },
+  { command: 'md' },
+  { command: 'pmd' },
 ];
 
 /**
@@ -48,12 +52,12 @@ export const channelDefaultAdministratorRights: ChatAdministratorRights = {
   can_post_messages: true,
 } as const;
 
-export const worksInGroups = false;
+export const worksInGroups = true;
 export const groupDefaultAdministratorRights: ChatAdministratorRights = {
-  can_manage_chat: true,
+  can_manage_chat: false,
   can_change_info: false,
-  can_invite_users: true,
-  can_delete_messages: true,
+  can_invite_users: false,
+  can_delete_messages: false,
   can_delete_stories: false,
   can_edit_stories: false,
   can_post_stories: false,
@@ -107,12 +111,7 @@ export const pollingOptions: PollingOptions = {
  * that cannot be done automatically through the API
  */
 export function setupGuideManualSteps() {
-  return [
-    'Update the bot picture',
-    'Toggle inline mode on',
-    'Edit the inline placeholder',
-    'Turn inline feedback to 100%',
-  ];
+  return ['Update the bot picture'];
 }
 
 /**
@@ -121,14 +120,14 @@ export function setupGuideManualSteps() {
 export const botProperties = {
   can_join_groups: worksInGroups,
   can_read_all_group_messages: false,
-  supports_inline_queries: true,
+  supports_inline_queries: false,
   can_connect_to_business: false,
 } as const;
 
 /**
  * A list of supported locales
  */
-export const supportedLocales = ['it', 'en'] as const satisfies LanguageCode[];
+export const supportedLocales = ['en'] as const satisfies LanguageCode[];
 
 /**
  * Creates the config for the app by parsing the env

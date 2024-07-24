@@ -1,5 +1,4 @@
 import { Composer } from 'grammy';
-import { ik } from '../lib/utils';
 import { MyContext } from '../types/grammy';
 import { TgCallbacksBag } from 'grammy-tg-components';
 
@@ -8,47 +7,47 @@ const _mainMenuModule = mainMenuModule.chatType(['private']);
 const _callbacksModule = new TgCallbacksBag<MyContext>('menu');
 _mainMenuModule.use(_callbacksModule);
 
-_mainMenuModule.command('start', async (ctx) => {
-  await ctx.reply(
-    'Hello world!',
-    ik([
-      [helloCb.getBtn('Hello!')],
-      [1, 2, 3].map((x) => hello2Cb.getBtn(`hello ${x}`, x)),
-      [
-        {
-          text: 'Test inline',
-          switch_inline_query_current_chat: 'test',
-        },
-      ],
-    ])
-  );
+async function replyWithMainMenu(ctx: MyContext) {
+  await ctx.editOrReply({
+    text: ctx.t('welcome'),
+    keyboard: [
+      [infoCb.getBtn(ctx.t('info-btn'))],
+      [sampleCb.getBtn(ctx.t('sample-btn'))],
+    ],
+  });
+}
+
+_mainMenuModule.command('start', replyWithMainMenu);
+const menuCb = _callbacksModule.makeCallback('menu', replyWithMainMenu);
+
+/**
+ * Sample formatting taken from https://core.telegram.org/bots/api#html-style
+ */
+const sampleCb = _callbacksModule.makeCallback('sample', async (ctx) => {
+  await ctx.editOrReply({
+    text:
+      `<b>bold</b>, <strong>bold</strong>
+<i>italic</i>, <em>italic</em>
+<u>underline</u>, <ins>underline</ins>
+<s>strikethrough</s>, <strike>strikethrough</strike>, <del>strikethrough</del>
+<span class="tg-spoiler">spoiler</span>, <tg-spoiler>spoiler</tg-spoiler>
+<b>bold <i>italic bold <s>italic bold strikethrough <span class="tg-spoiler">italic bold strikethrough spoiler</span></s> <u>underline italic bold</u></i> bold</b>
+<a href="http://www.example.com/">inline URL</a>
+<a href="tg://user?id=${ctx.from.id}">inline mention of a user</a>
+<tg-emoji emoji-id="5368324170671202286">👍</tg-emoji>
+<code>inline fixed-width code</code>
+<pre>pre-formatted fixed-width code block</pre>
+<pre><code class="language-python">pre-formatted fixed-width code block written in the Python programming language</code></pre>
+<blockquote>Block quotation started\nBlock quotation continued\nThe last line of the block quotation</blockquote>
+<blockquote expandable>Expandable block quotation started\nExpandable block quotation continued\nExpandable block quotation continued\nHidden by default part of the block quotation started\nExpandable block quotation continued\nThe last line of the block quotation</blockquote>\n\n` +
+      ctx.t('sample-reply-with-html-md'),
+    keyboard: [[menuCb.getBtn(ctx.t('back-to-menu'))]],
+  });
 });
 
-const helloCb = _callbacksModule.makeCallback('hello', async (ctx) => {
-  // ctx.callbackParams: never[]
-  await ctx.answerCallbackQuery(
-    `Hello ${ctx.dbUser.telegram_chat.first_name}!`
-  );
-});
-
-const hello2Cb = _callbacksModule.makeCallback<[value: number]>(
-  'hello2',
-  async (ctx) => {
-    // value: number
-    const [value] = ctx.callbackParams;
-    await ctx.answerCallbackQuery(`Hello ${value}!`);
-  }
-);
-
-mainMenuModule.inlineQuery('test', async (ctx) => {
-  await ctx.answerInlineQuery([
-    {
-      type: 'article',
-      id: '1',
-      input_message_content: {
-        message_text: 'Hello inline mode',
-      },
-      title: 'Test inline',
-    },
-  ]);
+const infoCb = _callbacksModule.makeCallback('info', async (ctx) => {
+  await ctx.editOrReply({
+    text: ctx.t('info-message'),
+    keyboard: [[menuCb.getBtn(ctx.t('back-to-menu'))]],
+  });
 });

@@ -11,6 +11,8 @@ import { editOrReplyMiddleware } from 'grammy-edit-or-reply';
 import { TgError, defaultTgErrorHandler } from './lib/tg-error';
 import { tgComponentsMiddleware } from 'grammy-tg-components';
 import { mainMenuModule } from './modules/main-menu';
+import { unparseHtmlModule, unparseMdModule } from './modules/unparse';
+import { fallbackModule } from './modules/fallback';
 
 export function configureBot(bot: Bot<MyContext>) {
   bot.use(
@@ -37,6 +39,9 @@ export function configureBot(bot: Bot<MyContext>) {
 
   // modules
   bot.use(mainMenuModule);
+  bot.use(unparseHtmlModule);
+  bot.use(unparseMdModule);
+  bot.use(fallbackModule);
 
   // unexpected unhandled callback data
   bot.on('callback_query:data', async (ctx, next) => {
