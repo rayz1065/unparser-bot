@@ -24,13 +24,18 @@ services:
       - bot-network
     depends_on:
       - postgres
-    user: "${UID}:${GID}"
+    user: '${UID}:${GID}'
     environment:
       - TZ=${TZ}
       - BOT_TOKEN=${BOT_TOKEN}
       - DEFAULT_LOCALE=${DEFAULT_LOCALE}
       - ADMIN_USER_IDS=${ADMIN_USER_IDS}
       - DATABASE_URL=${DATABASE_URL}
+      - USE_WEBHOOK=${USE_WEBHOOK}
+      - BOT_TOKEN_ENCRYPTION_SECRET=${BOT_TOKEN_ENCRYPTION_SECRET}
+      - API_ROOT_URL=${API_ROOT_URL}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
 
 volumes:
   pgdata:

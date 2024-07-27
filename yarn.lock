@@ -109,6 +109,11 @@
   resolved "https://registry.yarnpkg.com/@grammyjs/types/-/types-3.11.0.tgz#d134ebdf765025109feb2aedec13d90a10712f8a"
   integrity sha512-LBIH8VnSEoeOHJxfvNFQ8QEsRip7D6GhY7y0evMl9W5FQ8p3q3bcYrtO2awxo1rSpi9RcoCKX1icQ60kXkp7+w==
 
+"@hono/node-server@^1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@hono/node-server/-/node-server-1.12.0.tgz#e0a8e93811c96e3bb9fc29ba23915989bd477995"
+  integrity sha512-e6oHjNiErRxsZRZBmc2KucuvY3btlO/XPncIpP2X75bRdTilF9GLjm3NHvKKunpJbbJJj31/FoPTksTf8djAVw==
+
 "@humanwhocodes/config-array@^0.11.14":
   version "0.11.14"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.11.14.tgz#d78e481a039f7566ecc9660b4ea7fe6b1fec442b"
@@ -759,10 +764,10 @@ grammy-edit-or-reply@^1.1.1:
   resolved "https://registry.yarnpkg.com/grammy-edit-or-reply/-/grammy-edit-or-reply-1.1.1.tgz#4e837e395c59423ecc90294c687ad5a1cd2a8121"
   integrity sha512-TF+csZkC9utNpxFXeuyDUZ8QEZDm1xvFcQBjUXBQPhk8wpFUqgSGstwZ3Gmtz14lvkRkFElm9dFuFY2sl02Ucw==
 
-grammy-tg-components@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/grammy-tg-components/-/grammy-tg-components-0.0.1.tgz#442d84bbbb40d5fee9abf35fe1223386e468cd06"
-  integrity sha512-3DAQEtDMgXoC+aCCVjXOaSJzhl9LyfGEgrsL0ZHg8nUBN3kV3fvFqpkMMUbrHACSTiz3+iGRqxVHSToUnY4Plw==
+grammy-tg-components@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/grammy-tg-components/-/grammy-tg-components-0.0.2.tgz#1fa970e41d646e54bf423d9aed1660446a3f88ec"
+  integrity sha512-AwWBw5FQp7OQnfn9OE5GpWRL6dOeRHZCPyaWkEvqcWRZdc8bdoHhjBVGq7FpJmuySWHAG0T25zVeN5SLDBSJow==
   dependencies:
     dayjs "^1.11.11"
 
@@ -790,6 +795,11 @@ has-flag@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/has-flag/-/has-flag-4.0.0.tgz#944771fd9c81c81265c4d6941860da06bb59479b"
   integrity sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==
+
+hono@^4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/hono/-/hono-4.5.2.tgz#5440d8d2661cc1ec5a6e6427c5a3b0fb5b6e89dc"
+  integrity sha512-93P8XEALrHAUGRZoqXs8MDL3w9mDgRpbW9Sy5x4LS7srg78bKUw7EGynxze+Ft1e/rLGmDAbxeSTMu6dHUSRDw==
 
 ignore-by-default@^1.0.1:
   version "1.0.1"
