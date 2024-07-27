@@ -21,19 +21,27 @@ export function buildBot() {
   });
   bot.api.config.use(parseMode('HTML'));
 
-  bot.use(
+  const protectedBot = bot.errorBoundary((error) => {
+    if (error.message.indexOf('message is not modified:') !== -1) {
+      return;
+    }
+
+    console.error('Error boundary caught error:', error.message);
+  });
+
+  protectedBot.use(
     session({
       initial: () => ({}),
       storage: new PrismaAdapter(prisma.session),
     })
   );
 
-  bot.use(hydrateReply);
-  bot.use(i18n);
-  bot.use(storeTelegramChat);
-  bot.use(authenticate);
-  bot.use(conversations());
-  bot.use(
+  protectedBot.use(hydrateReply);
+  protectedBot.use(i18n);
+  protectedBot.use(storeTelegramChat);
+  protectedBot.use(authenticate);
+  protectedBot.use(conversations());
+  protectedBot.use(
     tgComponentsMiddleware({
       eventRejectionHandler: async (ctx, error) => {
         const tgError = new TgError(error.message, error.variables);
@@ -41,22 +49,15 @@ export function buildBot() {
       },
     })
   );
-  bot.use(editOrReplyMiddleware());
+  protectedBot.use(editOrReplyMiddleware());
 
   // modules
-  bot.use(mainMenuModule);
+  protectedBot.use(mainMenuModule);
 
   // unexpected unhandled callback data
-  bot.on('callback_query:data', async (ctx, next) => {
+  protectedBot.on('callback_query:data', async (ctx, next) => {
     console.warn('No match for data', ctx.callbackQuery.data);
     await next();
-  });
-
-  bot.catch((error) => {
-    if (error.message.indexOf('message is not modified:') !== -1) {
-      return;
-    }
-    console.error(error);
   });
 
   return bot;
