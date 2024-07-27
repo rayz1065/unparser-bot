@@ -1,12 +1,11 @@
 import { pollingOptions } from '../config';
-import { bot } from '../bot';
 import { prisma } from '../prisma';
-import { configureBot } from '../main';
+import { buildBot } from '../main';
 import '../dayjs';
 
 async function main() {
   console.log('Bot running...');
-  configureBot(bot);
+  const bot = buildBot();
   await bot.start(pollingOptions);
 }
 

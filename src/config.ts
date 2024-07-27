@@ -154,4 +154,5 @@ function getAppConfig(env: NodeJS.ProcessEnv) {
 }
 
 export type AppConfig = ReturnType<typeof getAppConfig>;
+export type AppConfigFlavor = { config: AppConfig };
 export const appConfig = getAppConfig(process.env);

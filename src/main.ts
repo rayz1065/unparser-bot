@@ -1,18 +1,26 @@
 import { Bot, session } from 'grammy';
-import { hydrateReply } from '@grammyjs/parse-mode';
+import { hydrateReply, parseMode } from '@grammyjs/parse-mode';
 import { conversations } from '@grammyjs/conversations';
 import { authenticate } from './middlewares/authenticate';
 import { PrismaAdapter } from '@grammyjs/storage-prisma';
 import { prisma } from './prisma';
 import { i18n } from './i18n';
 import { storeTelegramChat } from './middlewares/store-telegram-chat';
-import { MyContext } from './types/grammy';
+import { createContextConstructor, MyContext } from './context';
 import { editOrReplyMiddleware } from 'grammy-edit-or-reply';
 import { TgError, defaultTgErrorHandler } from './lib/tg-error';
 import { tgComponentsMiddleware } from 'grammy-tg-components';
 import { mainMenuModule } from './modules/main-menu';
+import { appConfig } from './config';
 
-export function configureBot(bot: Bot<MyContext>) {
+export function buildBot() {
+  const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {
+    ContextConstructor: createContextConstructor({
+      config: appConfig,
+    }),
+  });
+  bot.api.config.use(parseMode('HTML'));
+
   bot.use(
     session({
       initial: () => ({}),
@@ -50,4 +58,6 @@ export function configureBot(bot: Bot<MyContext>) {
     }
     console.error(error);
   });
+
+  return bot;
 }

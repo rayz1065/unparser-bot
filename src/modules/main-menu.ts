@@ -1,6 +1,6 @@
 import { Composer } from 'grammy';
 import { ik } from '../lib/utils';
-import { MyContext } from '../types/grammy';
+import { MyContext } from '../context';
 import { TgCallbacksBag } from 'grammy-tg-components';
 
 export const mainMenuModule = new Composer<MyContext>();

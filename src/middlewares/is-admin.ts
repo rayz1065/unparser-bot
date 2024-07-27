@@ -1,17 +1,17 @@
 import { Context, Middleware } from 'grammy';
-import { appConfig } from '../config';
+import { AppConfigFlavor } from '../config';
 
-export function isAdmin(ctx: Context): boolean {
+export function isAdmin(ctx: Context & AppConfigFlavor): boolean {
   const userId = ctx.from?.id;
   if (!userId) {
     return false;
   }
-  const adminUserIds = appConfig.ADMIN_USER_IDS;
+  const adminUserIds = ctx.config.ADMIN_USER_IDS;
 
   return adminUserIds.includes(userId);
 }
 
-export function ensureAdmin(): Middleware<Context> {
+export function ensureAdmin(): Middleware<Context & AppConfigFlavor> {
   return (ctx, next) => {
     if (isAdmin(ctx)) {
       return next();

@@ -1,5 +1,5 @@
 import { I18n } from '@grammyjs/i18n';
-import { MyContext } from './types/grammy';
+import { MyContext } from './context';
 import path from 'path';
 import { escapeHtml } from './lib/utils';
 import { appConfig } from './config';
