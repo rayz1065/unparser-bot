@@ -8,15 +8,17 @@ import { Conversation, ConversationFlavor } from '@grammyjs/conversations';
 import { EditOrReplyFlavor } from 'grammy-edit-or-reply';
 import { StoredChatFlavor } from './middlewares/store-telegram-chat';
 import { AuthenticatedFlavor } from './middlewares/authenticate';
+import { Logger, LoggerFlavor } from './logger';
 
 export interface SessionData {
   // field?: string;
 }
 
-type ExtendedContextFlavor = AppConfigFlavor;
+type ExtendedContextFlavor = AppConfigFlavor & LoggerFlavor;
 
 interface Dependencies {
   config: AppConfig;
+  logger: Logger;
 }
 
 export type MySessionData = Record<string, never>;
@@ -34,13 +36,17 @@ export type MyContext = MyBaseContext & StoredChatFlavor & AuthenticatedFlavor;
 
 export type MyConversation = Conversation<MyContext>;
 
-export function createContextConstructor({ config }: Dependencies) {
+export function createContextConstructor({ config, logger }: Dependencies) {
   return class extends Context implements ExtendedContextFlavor {
     config: AppConfig;
+    logger: Logger;
 
     constructor(update: Update, api: Api, me: UserFromGetMe) {
       super(update, api, me);
       this.config = config;
+      this.logger = logger.child({
+        update_id: this.update.update_id,
+      });
     }
   } as unknown as new (
     update: Update,

@@ -4,12 +4,18 @@ import { HTTPException } from 'hono/http-exception';
 import { Bot, webhookCallback } from 'grammy';
 import { MyContext } from '../context';
 import { appConfig } from '../config';
+import { Logger } from '../logger';
 
-export function startServer(bot: Bot<MyContext>) {
+type Dependencies = {
+  bot: Bot<MyContext>;
+  logger: Logger;
+};
+
+export function startServer({ bot, logger }: Dependencies) {
   const app = new Hono();
 
   const port = 3000;
-  console.log(`Server is running on port ${port}`);
+  logger.info(`Server is running on port ${port}`);
 
   app.get('/ping', (c) => {
     return c.json({
@@ -36,21 +42,21 @@ export function startServer(bot: Bot<MyContext>) {
   app.onError((err, c) => {
     if (err instanceof HTTPException) {
       if (err.status < 500) {
-        console.info('client error', err);
+        logger.info(err, 'client error');
       } else {
-        console.error('server error', err);
+        logger.error(err, 'server error');
       }
       return err.getResponse();
     }
 
-    console.error('unexpected error', err);
+    logger.error(err, 'unexpected error');
     return c.json({ ok: false, error: 'Internal Server Error' }, 500);
   });
 
-  serve({
+  const server = serve({
     fetch: app.fetch,
     port,
   });
 
-  return app;
+  return { app, server };
 }

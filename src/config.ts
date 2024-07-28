@@ -150,6 +150,8 @@ function getAppConfig(env: NodeJS.ProcessEnv) {
       WEBHOOK_SECRET: z.string().default(''),
       API_ROOT_URL: z.string(),
       WEBHOOK_URL: z.string().optional(),
+      NODE_ENV: z.enum(['development', 'production']).default('development'),
+      LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
     })
     .parse(env);
 

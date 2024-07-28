@@ -1,11 +1,13 @@
 FROM node:20 AS dev
 
+ENV NODE_ENV=development
+ENV PATH=/app/node_modules/.bin:$PATH
+
 USER node
 
 WORKDIR /app
 
-COPY package.json package.json
-COPY yarn.lock yarn.lock
+COPY package.json yarn.lock /app/
 
 RUN yarn install --frozen-lockfile
 
@@ -13,14 +15,12 @@ COPY prisma prisma
 
 RUN npx prisma generate
 
-ENV NODE_ENV=development
-
 CMD ["npm", "start"]
 
 FROM dev as prod
 
-COPY . .
-
 ENV NODE_ENV=production
 
-CMD ["npx", "ts-node", "/app/src/bin/run.ts"]
+COPY . .
+
+CMD ["ts-node", "./src/bin/run.ts"]

@@ -12,11 +12,13 @@ import { TgError, defaultTgErrorHandler } from './lib/tg-error';
 import { tgComponentsMiddleware } from 'grammy-tg-components';
 import { mainMenuModule } from './modules/main-menu';
 import { appConfig } from './config';
+import { logger } from './logger';
 
 export function buildBot() {
   const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {
     ContextConstructor: createContextConstructor({
       config: appConfig,
+      logger,
     }),
   });
   bot.api.config.use(parseMode('HTML'));
@@ -26,7 +28,14 @@ export function buildBot() {
       return;
     }
 
-    console.error('Error boundary caught error:', error.message);
+    error.ctx.logger.error(
+      {
+        error: error.error,
+        update: error.ctx.update,
+        stack: error.stack,
+      },
+      'Error boundary caught error'
+    );
   });
 
   protectedBot.use(
@@ -56,7 +65,7 @@ export function buildBot() {
 
   // unexpected unhandled callback data
   protectedBot.on('callback_query:data', async (ctx, next) => {
-    console.warn('No match for data', ctx.callbackQuery.data);
+    ctx.logger.warn({ data: ctx.callbackQuery.data }, 'No match for data');
     await next();
   });
 
