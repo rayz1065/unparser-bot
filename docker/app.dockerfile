@@ -17,7 +17,7 @@ RUN npx prisma generate
 
 CMD ["npm", "start"]
 
-FROM dev as prod
+FROM dev AS prod
 
 ENV NODE_ENV=production
 
