@@ -126,9 +126,8 @@ _unparseMdModule.command('md', async (ctx) => {
 
   const toUnparse = getMessageToUnparse(ctx);
   const result = unparseMd(toUnparse);
-  await ctx.replyFmt(fmt`${pre(result.join(''), 'Markdown')}`, {
-    parse_mode: undefined,
-  });
+  const prettyRes = fmt`${pre(result.join(''), 'Markdown')}`;
+  await ctx.splitAndReply(prettyRes.text, { entities: prettyRes.entities });
 });
 
 _unparseMdModule.command('pmd', async (ctx) => {

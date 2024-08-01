@@ -7,11 +7,12 @@ import { AuthenticatedFlavor } from '../middlewares/authenticate';
 import { TgCallbackFlavor } from 'grammy-tg-components';
 import { TgComponentsFlavor } from 'grammy-tg-components';
 import { EditOrReplyFlavor } from 'grammy-edit-or-reply';
+import { SplitAndReplyFlavor } from '../lib/split-and-reply';
 
 export type MySessionData = Record<string, never>;
 
 export type MyBaseContext = TgComponentsFlavor<
-  ParseModeFlavor<ConversationFlavor<Context>>
+  SplitAndReplyFlavor<ParseModeFlavor<ConversationFlavor<Context>>>
 > &
   SessionFlavor<MySessionData> &
   I18nFlavor &

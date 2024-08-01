@@ -42,12 +42,11 @@ _unparseTranspileModule.command('mdhtml', async (ctx) => {
   }
 
   const messageId = sentMessage.message_id;
+  ctx.api.deleteMessage(ctx.chatId, messageId).catch(() => {});
+
   const result = unparseHtml(sentMessage);
   const prettyRes = fmt`${pre(result.join(''), 'HTML')}`;
-  await ctx.api.editMessageText(ctx.chatId, messageId, prettyRes.text, {
-    parse_mode: undefined,
-    entities: prettyRes.entities,
-  });
+  await ctx.splitAndReply(prettyRes.text, { entities: prettyRes.entities });
 });
 
 _unparseTranspileModule.command('htmlmd', async (ctx) => {
@@ -78,10 +77,9 @@ _unparseTranspileModule.command('htmlmd', async (ctx) => {
   }
 
   const messageId = sentMessage.message_id;
+  ctx.api.deleteMessage(ctx.chatId, messageId).catch(() => {});
+
   const result = unparseMd(sentMessage);
   const prettyRes = fmt`${pre(result.join(''), 'Markdown')}`;
-  await ctx.api.editMessageText(ctx.chatId, messageId, prettyRes.text, {
-    parse_mode: undefined,
-    entities: prettyRes.entities,
-  });
+  await ctx.splitAndReply(prettyRes.text, { entities: prettyRes.entities });
 });

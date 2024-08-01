@@ -29,6 +29,8 @@ export const myCommands: { command: string; scope?: BotCommandScope }[] = [
   { command: 'md' },
   { command: 'both', scope: { type: 'all_private_chats' } },
   { command: 'both' },
+  { command: 'entities', scope: { type: 'all_private_chats' } },
+  { command: 'entities' },
   { command: 'phtml', scope: { type: 'all_private_chats' } },
   { command: 'phtml' },
   { command: 'pmd', scope: { type: 'all_private_chats' } },

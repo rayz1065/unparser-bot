@@ -29,6 +29,7 @@ cmd-description-start = Start the bot
 cmd-description-html = Convert message to HTML
 cmd-description-md = Convert message to Markdown
 cmd-description-both = Convert message to HTML and MarkdownV2
+cmd-description-entities = Convert message to entities list
 cmd-description-phtml = Parse HTML to message
 cmd-description-pmd = Parse Markdown to message
 cmd-description-htmlmd = Convert HTML to MarkdownV2
@@ -40,6 +41,7 @@ welcome =
     • 💬 → 🌐 /html &lt;message&gt;
     • 💬 → ⬇️ /md &lt;message&gt;
     • 💬 → 🌐⬇️ /both &lt;message&gt;
+    • 💬 → 🧩 /entities &lt;message&gt;
 
     <i>The bot may produce redundant encodings, since it doesn't de-duplicate nested entities, and to avoid producing potentially broken formatting with MarkdownV2</>
 
@@ -69,7 +71,7 @@ info-message =
 
 sample-btn = 📝 Sample
 sample-reply-with-html-md =
-    <i>👉 Reply to this message with /html or /md</>
+    <i>👉 Reply to this message with /html, /md, /both, or /entities</>
 
 # fallback
 reply-to-unparse =
@@ -77,6 +79,7 @@ reply-to-unparse =
     • 💬 → 🌐 /html
     • 💬 → ⬇️ /md
     • 💬 → 🌐⬇️ /both
+    • 💬 → 🧩 /entities
     Or to parse it:
     • 🌐 → 💬 /phtml
     • ⬇️ → 💬 /pmd
@@ -108,3 +111,6 @@ pmd-usage =
 phtml-usage = 
     <b>Usage</b>: /phtml &lt;message&gt;
     You can also reply to the message you want to parse
+entities-usage =
+    <b>Usage</b>: /entities &lt;message&gt;
+    You can also reply to the message you want to extract the entities from

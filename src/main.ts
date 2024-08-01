@@ -18,6 +18,8 @@ import {
 } from './modules/unparse';
 import { fallbackModule } from './modules/fallback';
 import { unparseTranspileModule } from './modules/unparse/transpile';
+import { unparseEntitiesModule } from './modules/unparse/entities';
+import { splitAndReply } from './lib/split-and-reply';
 
 export function configureBot(bot: Bot<MyContext>) {
   bot.use(
@@ -28,6 +30,7 @@ export function configureBot(bot: Bot<MyContext>) {
   );
 
   bot.use(hydrateReply);
+  bot.use(splitAndReply());
   bot.use(i18n);
   bot.use(storeTelegramChat);
   bot.use(authenticate);
@@ -48,6 +51,7 @@ export function configureBot(bot: Bot<MyContext>) {
   bot.use(unparseMdModule);
   bot.use(unparseBothModule);
   bot.use(unparseTranspileModule);
+  bot.use(unparseEntitiesModule);
   bot.use(fallbackModule);
 
   // unexpected unhandled callback data

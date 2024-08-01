@@ -20,12 +20,7 @@ _unparseBothModule.command('both', async (ctx) => {
   const toUnparse = getMessageToUnparse(ctx);
 
   const htmlResult = unparseHtml(toUnparse);
-  await ctx.replyFmt(fmt`${pre(htmlResult.join(''), 'HTML')}`, {
-    parse_mode: undefined,
-  });
-
   const mdResult = unparseMd(toUnparse);
-  await ctx.replyFmt(fmt`${pre(mdResult.join(''), 'Markdown')}`, {
-    parse_mode: undefined,
-  });
+  const prettyRes = fmt`${pre(htmlResult.join(''), 'HTML')} ${pre(mdResult.join(''), 'Markdown')}`;
+  await ctx.splitAndReply(prettyRes.text, { entities: prettyRes.entities });
 });

@@ -104,9 +104,8 @@ _unparseHtmlModule.command('html', async (ctx) => {
 
   const toUnparse = getMessageToUnparse(ctx);
   const result = unparseHtml(toUnparse);
-  await ctx.replyFmt(fmt`${pre(result.join(''), 'HTML')}`, {
-    parse_mode: undefined,
-  });
+  const prettyRes = fmt`${pre(result.join(''), 'HTML')}`;
+  await ctx.splitAndReply(prettyRes.text, { entities: prettyRes.entities });
 });
 
 _unparseHtmlModule.command('phtml', async (ctx) => {
