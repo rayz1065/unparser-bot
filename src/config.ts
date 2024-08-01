@@ -25,12 +25,18 @@ export const myCommands: { command: string; scope?: BotCommandScope }[] = [
   { command: 'start', scope: { type: 'all_private_chats' } },
   { command: 'html', scope: { type: 'all_private_chats' } },
   { command: 'html' },
-  { command: 'phtml', scope: { type: 'all_private_chats' } },
-  { command: 'phtml' },
   { command: 'md', scope: { type: 'all_private_chats' } },
   { command: 'md' },
+  { command: 'both', scope: { type: 'all_private_chats' } },
+  { command: 'both' },
+  { command: 'phtml', scope: { type: 'all_private_chats' } },
+  { command: 'phtml' },
   { command: 'pmd', scope: { type: 'all_private_chats' } },
   { command: 'pmd' },
+  { command: 'htmlmd', scope: { type: 'all_private_chats' } },
+  { command: 'htmlmd' },
+  { command: 'mdhtml', scope: { type: 'all_private_chats' } },
+  { command: 'mdhtml' },
 ];
 
 /**

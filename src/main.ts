@@ -17,6 +17,7 @@ import {
   unparseMdModule,
 } from './modules/unparse';
 import { fallbackModule } from './modules/fallback';
+import { unparseTranspileModule } from './modules/unparse/transpile';
 
 export function configureBot(bot: Bot<MyContext>) {
   bot.use(
@@ -46,6 +47,7 @@ export function configureBot(bot: Bot<MyContext>) {
   bot.use(unparseHtmlModule);
   bot.use(unparseMdModule);
   bot.use(unparseBothModule);
+  bot.use(unparseTranspileModule);
   bot.use(fallbackModule);
 
   // unexpected unhandled callback data

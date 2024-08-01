@@ -81,7 +81,7 @@ function getEntityMdCloseSyntax(entity: MessageEntity): string {
 
 export function unparseMd(message: {
   text: string;
-  entities: MessageEntity[];
+  entities?: MessageEntity[];
 }) {
   const unparsed = unparse(message);
 

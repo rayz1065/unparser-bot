@@ -27,9 +27,12 @@ bot-description =
 # commands
 cmd-description-start = Start the bot
 cmd-description-html = Convert message to HTML
-cmd-description-phtml = Parse HTML to message
 cmd-description-md = Convert message to Markdown
+cmd-description-both = Convert message to HTML and MarkdownV2
+cmd-description-phtml = Parse HTML to message
 cmd-description-pmd = Parse Markdown to message
+cmd-description-htmlmd = Convert HTML to MarkdownV2
+cmd-description-mdhtml = Convert Markdown to HTML
 
 # main menu
 welcome = 
@@ -45,6 +48,10 @@ welcome =
     • ⬇️ → 💬 /pmd &lt;message&gt;
 
     <i>You might need to send your text as code to prevent your Telegram client from pre-parsing it for you</>
+
+    Finally, this bot can transpile between HTML and MarkdownV2 in a single command:
+    • 🌐 → 💬 → ⬇️ /htmlmd &lt;message&gt;
+    • ⬇️ → 💬 → 🌐 /mdhtml &lt;message&gt;
 
     ↩️ You can also use all these commands <b>in reply to</> the message to (un)parse
 
@@ -69,9 +76,13 @@ reply-to-unparse =
     Reply to this message to unparse it:
     • 💬 → 🌐 /html
     • 💬 → ⬇️ /md
+    • 💬 → 🌐⬇️ /both
     Or to parse it:
     • 🌐 → 💬 /phtml
-    • 🌐 → ⬇️ /pmd
+    • ⬇️ → 💬 /pmd
+    Or to transpile it
+    • 🌐 → ⬇️ /htmlmd
+    • ⬇️ → 🌐 /mdhtml
 
 # unparse
 parsing-failed =
@@ -82,6 +93,15 @@ md-usage =
 html-usage =
     <b>Usage</b>: /html &lt;message&gt;
     You can also reply to the message you want to unparse
+both-usage =
+    <b>Usage</b>: /both &lt;message&gt;
+    You can also reply to the message you want to unparse
+mdhtml-usage =
+    <b>Usage</b>: /mdhtml &lt;message&gt;
+    You can also reply to the message you want to transpile from MarkdownV2 to HTML
+htmlmd-usage =
+    <b>Usage</b>: /htmlmd &lt;message&gt;
+    You can also reply to the message you want to transpile from HTML to MarkdownV2
 pmd-usage = 
     <b>Usage</b>: /pmd &lt;message&gt;
     You can also reply to the message you want to parse

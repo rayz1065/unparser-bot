@@ -9,7 +9,10 @@ type UnparsedMessage = (
 
 type TextEntities = {
   text: string;
-  entities: MessageEntity[];
+  entities?: MessageEntity[];
+};
+type MakeRequired<T, K extends keyof T> = T & {
+  [key in K]-?: T[key];
 };
 
 /**
@@ -17,6 +20,7 @@ type TextEntities = {
  * start/end entities.
  */
 export function unparse({ text, entities }: TextEntities): UnparsedMessage {
+  entities ??= [];
   let entitiesIdx = 0;
   const entitiesStack: MessageEntity[] = [];
   const result: UnparsedMessage = [];
@@ -52,7 +56,7 @@ export function unparse({ text, entities }: TextEntities): UnparsedMessage {
  */
 export function getMessageToUnparse(
   ctx: Filter<MyContext, 'message'>
-): TextEntities {
+): MakeRequired<TextEntities, 'entities'> {
   const { message } = ctx;
   if (message.reply_to_message) {
     const replyToMessage = message.reply_to_message;

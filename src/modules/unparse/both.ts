@@ -14,7 +14,7 @@ const _unparseBothModule = unparseBothModule.chatType([
 
 _unparseBothModule.command('both', async (ctx) => {
   if (!ctx.match && !ctx.message.reply_to_message) {
-    return await ctx.reply(ctx.t('md-usage'));
+    return await ctx.reply(ctx.t('both-usage'));
   }
 
   const toUnparse = getMessageToUnparse(ctx);
