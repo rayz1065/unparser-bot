@@ -21,7 +21,7 @@ const entityHtmlTags = {
     `<tg-emoji emoji-id="${entity.custom_emoji_id}">`,
     `</tg-emoji`,
   ],
-  expandable_blockquote: ['<blockquote>', '</blockquote>'],
+  expandable_blockquote: ['<blockquote expandable>', '</blockquote>'],
   mention: null,
   pre: (entity) =>
     entity.language
