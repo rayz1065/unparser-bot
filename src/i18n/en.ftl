@@ -36,6 +36,7 @@ welcome =
     👋 Hello! To unparse a message simply use the command
     • 💬 → 🌐 /html &lt;message&gt;
     • 💬 → ⬇️ /md &lt;message&gt;
+    • 💬 → 🌐⬇️ /both &lt;message&gt;
 
     <i>The bot may produce redundant encodings, since it doesn't de-duplicate nested entities, and to avoid producing potentially broken formatting with MarkdownV2</>
 

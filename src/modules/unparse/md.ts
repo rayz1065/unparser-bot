@@ -79,7 +79,10 @@ function getEntityMdCloseSyntax(entity: MessageEntity): string {
   return getNormalizedSyntax(entity)[1];
 }
 
-function unparseMd(message: { text: string; entities: MessageEntity[] }) {
+export function unparseMd(message: {
+  text: string;
+  entities: MessageEntity[];
+}) {
   const unparsed = unparse(message);
 
   const result: string[] = [];

@@ -78,7 +78,10 @@ function getEntityHtmlCloseTag(entity: MessageEntity): string | null {
   return getNormalizedTag(entity)[1];
 }
 
-function unparseHtml(message: { text: string; entities: MessageEntity[] }) {
+export function unparseHtml(message: {
+  text: string;
+  entities: MessageEntity[];
+}) {
   const unparsed = unparse(message);
 
   const result = unparsed
