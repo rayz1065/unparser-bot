@@ -48,6 +48,18 @@ const sampleCb = _callbacksModule.makeCallback('sample', async (ctx) => {
 const infoCb = _callbacksModule.makeCallback('info', async (ctx) => {
   await ctx.editOrReply({
     text: ctx.t('info-message'),
-    keyboard: [[menuCb.getBtn(ctx.t('back-to-menu'))]],
+    keyboard: [
+      [
+        { text: '📦', url: 'https://github.com/rayz1065/unparser-bot' },
+        { text: '🛠', url: 'https://grammy.dev' },
+        {
+          text: '📚',
+          url: 'https://core.telegram.org/bots/api#formatting-options',
+        },
+        { text: '🧑‍💻', url: 'https://t.me/rayz1065' },
+        { text: '📄', url: 'https://www.gnu.org/licenses/agpl-3.0.en.html' },
+      ],
+      [menuCb.getBtn(ctx.t('back-to-menu'))],
+    ],
   });
 });
