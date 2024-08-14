@@ -88,9 +88,27 @@ reply-to-unparse =
     • 🌐 → ⬇️ /htmlmd
     • ⬇️ → 🌐 /mdhtml
 
+# Inline mode
+inline-loading = Loading...
+inline-loading-info = In some cases (such as a anonymous admin) this will load forever...
+inline-parse-md = Parse Markdown ⬇️ → 💬
+inline-parse-md-description = Write some Markdown text to parse...
+inline-parse-html = Parse HTML 🌐 → 💬
+inline-parse-html-description = Write some HTML text to parse...
+inline-help = Write some text to parse...
+inline-help-description = Click here for an explanation
+inline-help-text = ℹ️ You can write my username in any chat and pass the text you want to parse.
+    Afterwards you can pick <b>{inline-parse-md}</> or <b>{inline-parse-html}</> to parse the text using the specified language.
+inline-help-parse-some-text = 🌐 Parse some text ⬇️
+
+# Inline results
+inline-result-source = Source
+
 # unparse
 parsing-failed =
     Parsing failed: <code>{$error}</code>
+parsing-failed-md =
+    Parsing failed: `{$error}`
 md-usage =
     <b>Usage</b>: /md &lt;message&gt;
     You can also reply to the message you want to unparse

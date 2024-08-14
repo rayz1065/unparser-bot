@@ -154,3 +154,24 @@ _unparseMdModule.command('pmd', async (ctx) => {
     );
   }
 });
+
+unparseMdModule.chosenInlineResult('pmd', async (ctx) => {
+  const query = ctx.chosenInlineResult.query;
+  const escapedQuery = escapeMdPre(query);
+  const prettySource =
+    `👇 *${ctx.t('inline-result-source')}*\n` +
+    `\`\`\`Markdown\n${escapedQuery}\`\`\``;
+  try {
+    const text = `${replaceMentions(ctx.from, query)}\n\n${prettySource}`;
+    await ctx.editMessageText(text, { parse_mode: 'MarkdownV2' });
+  } catch (error) {
+    if (!(error instanceof GrammyError)) {
+      throw error;
+    }
+    await ctx.editMessageText(
+      ctx.t('parsing-failed-md', { error: escapeMd(error.message) }) +
+        `\n\n${prettySource}`,
+      { parse_mode: 'MarkdownV2' }
+    );
+  }
+});

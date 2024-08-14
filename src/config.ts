@@ -124,7 +124,7 @@ export const pollingOptions: PollingOptions = {
  * that cannot be done automatically through the API
  */
 export function setupGuideManualSteps() {
-  return ['Update the bot picture'];
+  return ['Update the bot picture', 'Set inline feedback to 100%'];
 }
 
 /**
@@ -133,7 +133,7 @@ export function setupGuideManualSteps() {
 export const botProperties = {
   can_join_groups: worksInGroups,
   can_read_all_group_messages: false,
-  supports_inline_queries: false,
+  supports_inline_queries: true,
   can_connect_to_business: false,
 } as const;
 

@@ -4,6 +4,7 @@ import { MessageEntity } from 'grammy/types';
 import { escapeHtml } from '../../lib/utils';
 import { fmt, pre } from '@grammyjs/parse-mode';
 import { getMessageToUnparse, unparse } from './unparse';
+import { replaceMentions } from './replace-mentions';
 
 export const unparseHtmlModule = new Composer<MyContext>();
 const _unparseHtmlModule = unparseHtmlModule.chatType([
@@ -120,7 +121,7 @@ _unparseHtmlModule.command('phtml', async (ctx) => {
   }
 
   try {
-    await ctx.reply(messageText, {
+    await ctx.reply(replaceMentions(ctx.from, messageText), {
       parse_mode: 'HTML',
     });
   } catch (error) {
@@ -131,6 +132,26 @@ _unparseHtmlModule.command('phtml', async (ctx) => {
       ctx.t('parsing-failed', {
         error: escapeHtml(error.message),
       })
+    );
+  }
+});
+
+unparseHtmlModule.chosenInlineResult('phtml', async (ctx) => {
+  const query = ctx.chosenInlineResult.query;
+  const escapedQuery = escapeHtml(query);
+  const prettySource =
+    `👇 <b>${ctx.t('inline-result-source')}</>\n` +
+    `<pre><code class="language-html">${escapedQuery}</code></pre>`;
+  try {
+    const text = `${replaceMentions(ctx.from, query)}\n\n${prettySource}`;
+    await ctx.editMessageText(text, { parse_mode: 'HTML' });
+  } catch (error) {
+    if (!(error instanceof GrammyError)) {
+      throw error;
+    }
+    await ctx.editMessageText(
+      ctx.t('parsing-failed', { error: escapeHtml(error.message) }) +
+        `\n\n${prettySource}`
     );
   }
 });

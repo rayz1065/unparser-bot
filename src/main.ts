@@ -20,6 +20,8 @@ import { fallbackModule } from './modules/fallback';
 import { unparseTranspileModule } from './modules/unparse/transpile';
 import { unparseEntitiesModule } from './modules/unparse/entities';
 import { splitAndReply } from './lib/split-and-reply';
+import { inlineModule } from './modules/inline';
+import { unparserInlineModule } from './modules/unparse/inline';
 
 export function configureBot(bot: Bot<MyContext>) {
   bot.use(
@@ -52,6 +54,8 @@ export function configureBot(bot: Bot<MyContext>) {
   bot.use(unparseBothModule);
   bot.use(unparseTranspileModule);
   bot.use(unparseEntitiesModule);
+  bot.use(inlineModule);
+  bot.use(unparserInlineModule);
   bot.use(fallbackModule);
 
   // unexpected unhandled callback data
