@@ -23,6 +23,7 @@ import z from 'zod';
  */
 export const myCommands: { command: string; scope?: BotCommandScope }[] = [
   { command: 'start', scope: { type: 'all_private_chats' } },
+  { command: 'help', scope: { type: 'all_private_chats' } },
   { command: 'html', scope: { type: 'all_private_chats' } },
   { command: 'html' },
   { command: 'md', scope: { type: 'all_private_chats' } },

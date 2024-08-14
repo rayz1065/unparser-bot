@@ -26,6 +26,7 @@ bot-description =
 
 # commands
 cmd-description-start = Start the bot
+cmd-description-help = Get help for the bot
 cmd-description-html = Convert message to HTML
 cmd-description-md = Convert message to Markdown
 cmd-description-both = Convert message to HTML and MarkdownV2

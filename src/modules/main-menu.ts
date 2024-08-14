@@ -4,8 +4,8 @@ import { TgCallbacksBag } from 'grammy-tg-components';
 
 export const mainMenuModule = new Composer<MyContext>();
 const _mainMenuModule = mainMenuModule.chatType(['private']);
-const _callbacksModule = new TgCallbacksBag<MyContext>('menu');
-_mainMenuModule.use(_callbacksModule);
+const callbacksBag = new TgCallbacksBag<MyContext>('menu');
+_mainMenuModule.use(callbacksBag);
 
 async function replyWithMainMenu(ctx: MyContext) {
   await ctx.editOrReply({
@@ -18,12 +18,12 @@ async function replyWithMainMenu(ctx: MyContext) {
 }
 
 _mainMenuModule.command('start', replyWithMainMenu);
-const menuCb = _callbacksModule.makeCallback('menu', replyWithMainMenu);
+const menuCb = callbacksBag.makeCallback('menu', replyWithMainMenu);
 
 /**
  * Sample formatting taken from https://core.telegram.org/bots/api#html-style
  */
-const sampleCb = _callbacksModule.makeCallback('sample', async (ctx) => {
+const sampleCb = callbacksBag.makeCallback('sample', async (ctx) => {
   await ctx.editOrReply({
     text:
       `<b>bold</b>, <strong>bold</strong>
@@ -45,7 +45,7 @@ const sampleCb = _callbacksModule.makeCallback('sample', async (ctx) => {
   });
 });
 
-const infoCb = _callbacksModule.makeCallback('info', async (ctx) => {
+async function replyWithInfo(ctx: MyContext) {
   await ctx.editOrReply({
     text: ctx.t('info-message'),
     keyboard: [
@@ -62,4 +62,8 @@ const infoCb = _callbacksModule.makeCallback('info', async (ctx) => {
       [menuCb.getBtn(ctx.t('back-to-menu'))],
     ],
   });
-});
+}
+
+const infoCb = callbacksBag.makeCallback('info', replyWithInfo);
+_mainMenuModule.command('help', replyWithInfo);
+_mainMenuModule.command('info', replyWithInfo);
