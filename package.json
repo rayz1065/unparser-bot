@@ -1,8 +1,9 @@
 {
   "private": true,
+  "type": "module",
   "license": "AGPL-3.0-or-later",
   "scripts": {
-    "start": "nodemon --watch src/ --ext ts,json,ftl src/bin/run.ts",
+    "start": "tsc-watch --onSuccess \"tsx ./src/bin/run.ts\"",
     "build": "npx tsc",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
@@ -22,9 +23,9 @@
     "grammy-edit-or-reply": "^1.1.1",
     "grammy-tg-components": "^0.0.2",
     "hono": "^4.5.2",
-    "nodemon": "^3.1.4",
     "pino": "^9.3.2",
     "pino-pretty": "^11.2.2",
+    "tsx": "^4.19.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -34,7 +35,7 @@
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "prisma": "^5.16.2",
-    "ts-node": "^10.9.2",
+    "tsc-watch": "^6.2.0",
     "typescript": "^5.5.3"
   }
 }

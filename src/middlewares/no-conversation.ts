@@ -1,5 +1,5 @@
 import { Middleware } from 'grammy';
-import { MyContext } from '../context';
+import { MyContext } from '../context.js';
 
 async function hasPendingConversation(ctx: MyContext) {
   const activeConversations = await ctx.conversation.active();

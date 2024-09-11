@@ -9,13 +9,13 @@ WORKDIR /app
 
 COPY package.json yarn.lock /app/
 
-RUN yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile && yarn cache clean
 
 COPY prisma prisma
 
 RUN npx prisma generate
 
-CMD ["npm", "start"]
+CMD ["yarn", "start"]
 
 FROM dev AS prod
 
@@ -23,4 +23,4 @@ ENV NODE_ENV=production
 
 COPY . .
 
-CMD ["ts-node", "./src/bin/run.ts"]
+CMD ["tsx", "/app/src/bin/run.ts"]

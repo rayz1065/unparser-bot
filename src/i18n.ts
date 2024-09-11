@@ -1,8 +1,10 @@
 import { I18n } from '@grammyjs/i18n';
-import { MyContext } from './context';
+import { MyContext } from './context.js';
 import path from 'path';
-import { escapeHtml } from './lib/utils';
-import { appConfig } from './config';
+import { escapeHtml } from './lib/utils.js';
+import { appConfig } from './config.js';
+
+const __dirname = import.meta.dirname;
 
 // set up translations
 export const i18n = new I18n<MyContext>({

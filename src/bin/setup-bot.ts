@@ -11,8 +11,8 @@ import {
   setupGuideManualSteps,
   worksInChannels,
   worksInGroups,
-} from '../config';
-import { i18n } from '../i18n';
+} from '../config.js';
+import { i18n } from '../i18n.js';
 import { LanguageCode } from 'grammy/types';
 import { Api } from 'grammy';
 

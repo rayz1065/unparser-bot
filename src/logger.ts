@@ -1,7 +1,8 @@
-import pino from 'pino';
-import { appConfig } from './config';
+import { pino } from 'pino';
+import { appConfig } from './config.js';
 import path from 'path';
 
+const __dirname = import.meta.dirname;
 const logDirectory = path.join(__dirname, '../storage/logs');
 
 export const logger = pino({

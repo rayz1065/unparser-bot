@@ -1,9 +1,9 @@
 import { Context, Middleware } from 'grammy';
-import { prisma } from '../prisma';
+import { prisma } from '../prisma.js';
 import { Prisma } from '@prisma/client';
 import { I18nFlavor } from '@grammyjs/i18n';
 import { User } from 'grammy/types';
-import { appConfig } from '../config';
+import { appConfig } from '../config.js';
 
 // add any missing includes here
 const userInclude = {

@@ -1,18 +1,18 @@
 import { Bot, session } from 'grammy';
 import { hydrateReply, parseMode } from '@grammyjs/parse-mode';
 import { conversations } from '@grammyjs/conversations';
-import { authenticate } from './middlewares/authenticate';
+import { authenticate } from './middlewares/authenticate.js';
 import { PrismaAdapter } from '@grammyjs/storage-prisma';
-import { prisma } from './prisma';
-import { i18n } from './i18n';
-import { storeTelegramChat } from './middlewares/store-telegram-chat';
-import { createContextConstructor, MyContext } from './context';
+import { prisma } from './prisma.js';
+import { i18n } from './i18n.js';
+import { storeTelegramChat } from './middlewares/store-telegram-chat.js';
+import { createContextConstructor, MyContext } from './context.js';
 import { editOrReplyMiddleware } from 'grammy-edit-or-reply';
-import { TgError, defaultTgErrorHandler } from './lib/tg-error';
+import { TgError, defaultTgErrorHandler } from './lib/tg-error.js';
 import { tgComponentsMiddleware } from 'grammy-tg-components';
-import { mainMenuModule } from './modules/main-menu';
-import { appConfig } from './config';
-import { logger } from './logger';
+import { mainMenuModule } from './modules/main-menu.js';
+import { appConfig } from './config.js';
+import { logger } from './logger.js';
 
 export function buildBot() {
   const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {

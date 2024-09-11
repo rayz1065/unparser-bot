@@ -2,13 +2,13 @@ import { Update, UserFromGetMe } from '@grammyjs/types';
 import { Api, Context, SessionFlavor } from 'grammy';
 import { I18nFlavor } from '@grammyjs/i18n';
 import { ParseModeFlavor } from '@grammyjs/parse-mode';
-import { AppConfig, AppConfigFlavor } from './config';
+import { AppConfig, AppConfigFlavor } from './config.js';
 import { TgCallbackFlavor, TgComponentsFlavor } from 'grammy-tg-components';
 import { Conversation, ConversationFlavor } from '@grammyjs/conversations';
 import { EditOrReplyFlavor } from 'grammy-edit-or-reply';
-import { StoredChatFlavor } from './middlewares/store-telegram-chat';
-import { AuthenticatedFlavor } from './middlewares/authenticate';
-import { Logger, LoggerFlavor } from './logger';
+import { StoredChatFlavor } from './middlewares/store-telegram-chat.js';
+import { AuthenticatedFlavor } from './middlewares/authenticate.js';
+import { Logger, LoggerFlavor } from './logger.js';
 
 export interface SessionData {
   // field?: string;

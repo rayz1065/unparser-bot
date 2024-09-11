@@ -1,6 +1,6 @@
 import { I18nFlavor, TranslationVariables } from '@grammyjs/i18n';
 import { Context } from 'grammy';
-import { LoggerFlavor } from '../logger';
+import { LoggerFlavor } from '../logger.js';
 
 /**
  * An error to be displayed to the user

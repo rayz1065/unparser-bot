@@ -1,9 +1,9 @@
-import { allowedUpdates, appConfig, pollingOptions } from '../config';
-import { prisma } from '../prisma';
-import { buildBot } from '../main';
-import '../dayjs';
-import { startServer } from '../server';
-import { logger } from '../logger';
+import { allowedUpdates, appConfig, pollingOptions } from '../config.js';
+import { prisma } from '../prisma.js';
+import { buildBot } from '../main.js';
+import '../dayjs.js';
+import { startServer } from '../server/index.js';
+import { logger } from '../logger.js';
 
 async function main() {
   const bot = buildBot();

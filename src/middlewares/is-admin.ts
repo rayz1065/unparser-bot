@@ -1,5 +1,5 @@
 import { Context, Middleware } from 'grammy';
-import { AppConfigFlavor } from '../config';
+import { AppConfigFlavor } from '../config.js';
 
 export function isAdmin(ctx: Context & AppConfigFlavor): boolean {
   const userId = ctx.from?.id;

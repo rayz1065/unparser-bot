@@ -1,9 +1,10 @@
 import { Context, Middleware } from 'grammy';
 import { I18nFlavor } from '@grammyjs/i18n';
-import { TgError, defaultTgErrorHandler } from '../lib/tg-error';
+import { TgError, defaultTgErrorHandler } from '../lib/tg-error.js';
+import { LoggerFlavor } from '../logger.js';
 
 export async function defaultCatchTgErrorsHandler(
-  ctx: Context & I18nFlavor,
+  ctx: Context & I18nFlavor & LoggerFlavor,
   error: TgError
 ) {
   await defaultTgErrorHandler(ctx, error);
@@ -17,7 +18,7 @@ export interface CatchTgErrorsOptions<T extends Context> {
   ) => void | Promise<void>;
 }
 
-export const catchTgErrors: <T extends Context & I18nFlavor>(
+export const catchTgErrors: <T extends Context & I18nFlavor & LoggerFlavor>(
   options?: CatchTgErrorsOptions<T>
 ) => Middleware<T> = (options) => async (ctx, next) => {
   try {

@@ -2,9 +2,9 @@ import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { Bot, webhookCallback } from 'grammy';
-import { MyContext } from '../context';
-import { appConfig } from '../config';
-import { Logger } from '../logger';
+import { MyContext } from '../context.js';
+import { appConfig } from '../config.js';
+import { Logger } from '../logger.js';
 
 type Dependencies = {
   bot: Bot<MyContext>;
