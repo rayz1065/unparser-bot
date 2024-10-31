@@ -51,7 +51,7 @@ export function escapeMdPre(text: string) {
  * preceding character '\\'.
  */
 export function escapeMd(text: string) {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, (match) => '\\' + match);
+  return text.replace(/[\\_*[\]()~`>#+\-=|{}.!]/g, (match) => '\\' + match);
 }
 
 export function ik(keyboard: InlineKeyboardButton[][]): {
