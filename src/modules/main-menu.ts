@@ -67,3 +67,4 @@ async function replyWithInfo(ctx: MyContext) {
 const infoCb = callbacksBag.makeCallback('info', replyWithInfo);
 _mainMenuModule.command('help', replyWithInfo);
 _mainMenuModule.command('info', replyWithInfo);
+_mainMenuModule.command('developer_info', replyWithInfo);
