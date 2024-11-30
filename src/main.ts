@@ -24,6 +24,7 @@ import { unparseEntitiesModule } from './modules/unparse/entities.js';
 import { splitAndReply } from './lib/split-and-reply.js';
 import { inlineModule } from './modules/inline.js';
 import { unparserInlineModule } from './modules/unparse/inline.js';
+import { documentationModule } from './modules/unparse/documentation.js';
 
 export function buildBot() {
   const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {
@@ -73,6 +74,7 @@ export function buildBot() {
   protectedBot.use(editOrReplyMiddleware());
 
   // modules
+  protectedBot.use(documentationModule);
   protectedBot.use(mainMenuModule);
   protectedBot.use(unparseHtmlModule);
   protectedBot.use(unparseMdModule);

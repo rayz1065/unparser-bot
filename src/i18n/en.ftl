@@ -4,7 +4,7 @@
 # base
 cancel = ❌ Cancel
 back = 🔙 Back
-back-to-menu = 🔙 Back to menu
+back-to-menu = 🏘 Back to menu
 confirm = ✅ Confirm
 
 # bot names and descriptions
@@ -74,6 +74,8 @@ sample-btn = 📝 Sample
 sample-reply-with-html-md =
     <i>👉 Reply to this message with /html, /md, /both, or /entities</>
 
+documentation-btn = 📖 Documentation
+
 # fallback
 reply-to-unparse =
     Reply to this message to unparse it:
@@ -103,6 +105,16 @@ inline-help-parse-some-text = 🌐 Parse some text ⬇️
 
 # Inline results
 inline-result-source = Source
+
+# Documentation
+documentation-source = Source
+documentation-title = Documentation
+documentation-official-documentation = 📚 <b>Official documentation</>: <a href="https://core.telegram.org/bots/api#formatting-options">Formatting options</>
+documentation-show-more = Show more 👉
+documentation-info-about = Info about <b>{$entityType}</>
+documentation-subtitle = Here you can see the available formatting options in both &lt;u&gt;<u>HTML</u>&lt/u&gt; and **<b>MarkdownV2</b>**
+documentation-pick-an-option-for-details = Pick an option for details
+documentation-share = Share
 
 # unparse
 parsing-failed =

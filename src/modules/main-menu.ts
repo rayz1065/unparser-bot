@@ -1,6 +1,7 @@
 import { Composer } from 'grammy';
 import { MyContext } from '../context.js';
 import { TgCallbacksBag } from 'grammy-tg-components';
+import { documentationMenuCb } from './unparse/documentation.js';
 
 export const mainMenuModule = new Composer<MyContext>();
 const _mainMenuModule = mainMenuModule.chatType(['private']);
@@ -11,6 +12,7 @@ async function replyWithMainMenu(ctx: MyContext) {
   await ctx.editOrReply({
     text: ctx.t('welcome'),
     keyboard: [
+      [documentationMenuCb.getBtn(ctx.t('documentation-btn'), false)],
       [infoCb.getBtn(ctx.t('info-btn'))],
       [sampleCb.getBtn(ctx.t('sample-btn'))],
     ],
@@ -18,7 +20,7 @@ async function replyWithMainMenu(ctx: MyContext) {
 }
 
 _mainMenuModule.command('start', replyWithMainMenu);
-const menuCb = callbacksBag.makeCallback('menu', replyWithMainMenu);
+export const menuCb = callbacksBag.makeCallback('menu', replyWithMainMenu);
 
 /**
  * Sample formatting taken from https://core.telegram.org/bots/api#html-style
