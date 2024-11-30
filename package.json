@@ -19,7 +19,7 @@
     "base-x": "^4.0.0",
     "commander": "^12.1.0",
     "dayjs": "^1.11.11",
-    "grammy": "^1.27.0",
+    "grammy": "^1.32.0",
     "grammy-edit-or-reply": "^1.1.1",
     "grammy-tg-components": "^0.0.2",
     "hono": "^4.5.2",
