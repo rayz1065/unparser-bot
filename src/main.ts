@@ -57,7 +57,7 @@ export function buildBot() {
   );
 
   protectedBot.use(hydrateReply);
-  bot.use(splitAndReply());
+  protectedBot.use(splitAndReply());
   protectedBot.use(i18n);
   protectedBot.use(storeTelegramChat);
   protectedBot.use(authenticate);
