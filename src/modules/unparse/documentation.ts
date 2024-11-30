@@ -153,9 +153,7 @@ function documentationMenu(
       )}</code></pre>`
     );
 
-    const markdownText = unparseMd(textEntities)
-      .join('')
-      .replaceAll(/(^\*\*|\*\*$)/g, '');
+    const markdownText = unparseMd(textEntities).join('').replaceAll('**', '');
 
     textLines.push(
       `<pre><code class="language-Markdown">${escapeHtml(
