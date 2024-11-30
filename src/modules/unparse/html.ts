@@ -42,12 +42,12 @@ const entityHtmlTags = {
   email: null,
   hashtag: null,
   phone_number: null,
-} satisfies Partial<{
+} satisfies {
   [T in MessageEntity['type']]:
     | null
     | [string, string]
     | ((entity: MessageEntity & { type: T }) => string | [string, string]);
-}>;
+};
 
 function getNormalizedTag(entity: MessageEntity): [string, string] {
   if (!(entity.type in entityHtmlTags)) {

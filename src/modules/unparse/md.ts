@@ -42,12 +42,12 @@ const entityMarkdownSyntax = {
   email: '',
   hashtag: '',
   phone_number: '',
-} satisfies Partial<{
+} satisfies {
   [T in MessageEntity['type']]:
     | string
     | [string, string]
     | ((entity: MessageEntity & { type: T }) => string | [string, string]);
-}>;
+};
 
 function getNormalizedSyntax(entity: MessageEntity): [string, string] {
   if (!(entity.type in entityMarkdownSyntax)) {
