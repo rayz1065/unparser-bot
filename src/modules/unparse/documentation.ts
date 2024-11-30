@@ -70,7 +70,7 @@ const entities = {
     text: '+1-212-555-0123',
     entities: [{ offset: 0, length: 15, type: 'phone_number' }],
   },
-  pre: parseMode.pre('pre-formatted fixed-width code block', 'language-python'),
+  pre: parseMode.pre('pre-formatted fixed-width code block', 'python'),
   spoiler: parseMode.spoiler('spoiler'),
   strikethrough: parseMode.strikethrough('strikethrough'),
   text_link: parseMode.link('inline URL', 'http://www.example.com/'),
