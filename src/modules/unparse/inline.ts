@@ -4,10 +4,10 @@ import {
   InlineKeyboard,
   InlineQueryResultBuilder,
 } from 'grammy';
-import { MyContext } from '../../types/grammy';
+import { MyContext } from '../../context.js';
 import { InlineQueryResult } from 'grammy/types';
 import { TgCallbacksBag } from 'grammy-tg-components';
-import { noPreview } from '../../lib/utils';
+import { noPreview } from '../../lib/utils.js';
 import { fmt, pre } from '@grammyjs/parse-mode';
 
 export const unparserInlineModule = new Composer<MyContext>();

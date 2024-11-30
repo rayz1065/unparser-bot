@@ -1,5 +1,5 @@
 import { MessageEntity } from 'grammy/types';
-import { MyContext } from '../../types/grammy';
+import { MyContext } from '../../context.js';
 import { Filter } from 'grammy';
 
 type UnparsedMessage = (

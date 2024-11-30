@@ -1,11 +1,11 @@
 import { Composer, GrammyError } from 'grammy';
-import { MyContext } from '../../types/grammy';
-import { unparseMd } from './md';
+import { MyContext } from '../../context.js';
+import { unparseMd } from './md.js';
 import { fmt, pre } from '@grammyjs/parse-mode';
-import { unparseHtml } from './html';
+import { unparseHtml } from './html.js';
 import { Message } from 'grammy/types';
-import { replaceMentions } from './replace-mentions';
-import { escapeHtml } from '../../lib/utils';
+import { replaceMentions } from './replace-mentions.js';
+import { escapeHtml } from '../../lib/utils.js';
 
 export const unparseTranspileModule = new Composer<MyContext>();
 const _unparseTranspileModule = unparseTranspileModule.chatType([

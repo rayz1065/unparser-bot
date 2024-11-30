@@ -1,6 +1,6 @@
 import { Composer } from 'grammy';
-import { MyContext } from '../../types/grammy';
-import { getMessageToUnparse } from './unparse';
+import { MyContext } from '../../context.js';
+import { getMessageToUnparse } from './unparse.js';
 import { fmt, pre } from '@grammyjs/parse-mode';
 
 export const unparseEntitiesModule = new Composer<MyContext>();

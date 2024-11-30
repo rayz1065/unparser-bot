@@ -1,9 +1,9 @@
 import { Composer } from 'grammy';
-import { MyContext } from '../../types/grammy';
-import { getMessageToUnparse } from './unparse';
-import { unparseMd } from './md';
+import { MyContext } from '../../context.js';
+import { getMessageToUnparse } from './unparse.js';
+import { unparseMd } from './md.js';
 import { fmt, pre } from '@grammyjs/parse-mode';
-import { unparseHtml } from './html';
+import { unparseHtml } from './html.js';
 
 export const unparseBothModule = new Composer<MyContext>();
 const _unparseBothModule = unparseBothModule.chatType([

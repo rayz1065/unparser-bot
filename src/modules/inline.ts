@@ -1,6 +1,6 @@
 import { Composer, InlineKeyboard, InlineQueryResultBuilder } from 'grammy';
-import { MyContext } from '../types/grammy';
-import { unparseGetInlineResults } from './unparse/inline';
+import { MyContext } from '../context.js';
+import { unparseGetInlineResults } from './unparse/inline.js';
 
 export const inlineModule = new Composer<MyContext>();
 

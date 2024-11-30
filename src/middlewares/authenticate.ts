@@ -1,9 +1,9 @@
 import { Context, Middleware } from 'grammy';
-import { prisma } from '../prisma';
+import { prisma } from '../prisma.js';
 import { Prisma } from '@prisma/client';
 import { I18nFlavor } from '@grammyjs/i18n';
 import { User } from 'grammy/types';
-import { appConfig } from '../config';
+import { appConfig } from '../config.js';
 
 // add any missing includes here
 const userInclude = {
@@ -82,8 +82,19 @@ export async function getUserFromUpdate(ctx: Context) {
     throw new Error('Ctx does not have a from field');
   }
 
-  const isPersonalChatOpenUpdate =
+  let isPersonalChatOpenUpdate =
     ctx.chat?.id === ctx.from.id ? true : undefined; // don't update if not needed
+
+  if (ctx.myChatMember) {
+    const myChatMember = ctx.myChatMember;
+    const newChatMember = myChatMember.new_chat_member;
+    if (myChatMember.chat.type === 'private') {
+      const blocked =
+        newChatMember.status === 'kicked' || newChatMember.status === 'left';
+
+      isPersonalChatOpenUpdate = !blocked;
+    }
+  }
 
   return upsertUser(ctx.from, isPersonalChatOpenUpdate);
 }

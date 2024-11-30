@@ -1,6 +1,6 @@
 import { Context, Middleware } from 'grammy';
 import { Prisma } from '@prisma/client';
-import { prisma } from '../prisma';
+import { prisma } from '../prisma.js';
 import { Chat } from 'grammy/types';
 
 // add any missing includes here

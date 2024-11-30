@@ -1,43 +1,68 @@
 import { Bot, session } from 'grammy';
-import { hydrateReply } from '@grammyjs/parse-mode';
+import { hydrateReply, parseMode } from '@grammyjs/parse-mode';
 import { conversations } from '@grammyjs/conversations';
-import { authenticate } from './middlewares/authenticate';
+import { authenticate } from './middlewares/authenticate.js';
 import { PrismaAdapter } from '@grammyjs/storage-prisma';
-import { prisma } from './prisma';
-import { i18n } from './i18n';
-import { storeTelegramChat } from './middlewares/store-telegram-chat';
-import { MyContext } from './types/grammy';
+import { prisma } from './prisma.js';
+import { i18n } from './i18n.js';
+import { storeTelegramChat } from './middlewares/store-telegram-chat.js';
+import { createContextConstructor, MyContext } from './context.js';
 import { editOrReplyMiddleware } from 'grammy-edit-or-reply';
-import { TgError, defaultTgErrorHandler } from './lib/tg-error';
+import { TgError, defaultTgErrorHandler } from './lib/tg-error.js';
 import { tgComponentsMiddleware } from 'grammy-tg-components';
-import { mainMenuModule } from './modules/main-menu';
+import { mainMenuModule } from './modules/main-menu.js';
+import { appConfig } from './config.js';
+import { logger } from './logger.js';
 import {
   unparseBothModule,
   unparseHtmlModule,
   unparseMdModule,
-} from './modules/unparse';
-import { fallbackModule } from './modules/fallback';
-import { unparseTranspileModule } from './modules/unparse/transpile';
-import { unparseEntitiesModule } from './modules/unparse/entities';
-import { splitAndReply } from './lib/split-and-reply';
-import { inlineModule } from './modules/inline';
-import { unparserInlineModule } from './modules/unparse/inline';
+} from './modules/unparse/index.js';
+import { fallbackModule } from './modules/fallback.js';
+import { unparseTranspileModule } from './modules/unparse/transpile.js';
+import { unparseEntitiesModule } from './modules/unparse/entities.js';
+import { splitAndReply } from './lib/split-and-reply.js';
+import { inlineModule } from './modules/inline.js';
+import { unparserInlineModule } from './modules/unparse/inline.js';
 
-export function configureBot(bot: Bot<MyContext>) {
-  bot.use(
+export function buildBot() {
+  const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {
+    ContextConstructor: createContextConstructor({
+      config: appConfig,
+      logger,
+    }),
+  });
+  bot.api.config.use(parseMode('HTML'));
+
+  const protectedBot = bot.errorBoundary((error) => {
+    if (error.message.indexOf('message is not modified:') !== -1) {
+      return;
+    }
+
+    error.ctx.logger.error(
+      {
+        error: error.error,
+        update: error.ctx.update,
+        stack: error.stack,
+      },
+      'Error boundary caught error'
+    );
+  });
+
+  protectedBot.use(
     session({
       initial: () => ({}),
       storage: new PrismaAdapter(prisma.session),
     })
   );
 
-  bot.use(hydrateReply);
+  protectedBot.use(hydrateReply);
   bot.use(splitAndReply());
-  bot.use(i18n);
-  bot.use(storeTelegramChat);
-  bot.use(authenticate);
-  bot.use(conversations());
-  bot.use(
+  protectedBot.use(i18n);
+  protectedBot.use(storeTelegramChat);
+  protectedBot.use(authenticate);
+  protectedBot.use(conversations());
+  protectedBot.use(
     tgComponentsMiddleware({
       eventRejectionHandler: async (ctx, error) => {
         const tgError = new TgError(error.message, error.variables);
@@ -45,29 +70,24 @@ export function configureBot(bot: Bot<MyContext>) {
       },
     })
   );
-  bot.use(editOrReplyMiddleware());
+  protectedBot.use(editOrReplyMiddleware());
 
   // modules
-  bot.use(mainMenuModule);
-  bot.use(unparseHtmlModule);
-  bot.use(unparseMdModule);
-  bot.use(unparseBothModule);
-  bot.use(unparseTranspileModule);
-  bot.use(unparseEntitiesModule);
-  bot.use(inlineModule);
-  bot.use(unparserInlineModule);
-  bot.use(fallbackModule);
+  protectedBot.use(mainMenuModule);
+  protectedBot.use(unparseHtmlModule);
+  protectedBot.use(unparseMdModule);
+  protectedBot.use(unparseBothModule);
+  protectedBot.use(unparseTranspileModule);
+  protectedBot.use(unparseEntitiesModule);
+  protectedBot.use(inlineModule);
+  protectedBot.use(unparserInlineModule);
+  protectedBot.use(fallbackModule);
 
   // unexpected unhandled callback data
-  bot.on('callback_query:data', async (ctx, next) => {
-    console.warn('No match for data', ctx.callbackQuery.data);
+  protectedBot.on('callback_query:data', async (ctx, next) => {
+    ctx.logger.warn({ data: ctx.callbackQuery.data }, 'No match for data');
     await next();
   });
 
-  bot.catch((error) => {
-    if (error.message.indexOf('message is not modified:') !== -1) {
-      return;
-    }
-    console.error(error);
-  });
+  return bot;
 }

@@ -1,13 +1,37 @@
-import { pollingOptions } from '../config';
-import { bot } from '../bot';
-import { prisma } from '../prisma';
-import { configureBot } from '../main';
-import '../dayjs';
+import { allowedUpdates, appConfig, pollingOptions } from '../config.js';
+import { prisma } from '../prisma.js';
+import { buildBot } from '../main.js';
+import '../dayjs.js';
+import { startServer } from '../server/index.js';
+import { logger } from '../logger.js';
 
 async function main() {
-  console.log('Bot running...');
-  configureBot(bot);
-  await bot.start(pollingOptions);
+  const bot = buildBot();
+
+  const { server } = startServer({ bot, logger });
+
+  onShutdown(async () => {
+    logger.info('Shutting down');
+
+    await Promise.all([
+      server.close(),
+      ...[!appConfig.USE_WEBHOOK ? [bot.stop()] : []],
+    ]);
+
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+
+  if (!appConfig.USE_WEBHOOK) {
+    logger.info('Bot running in polling mode...');
+    await bot.start(pollingOptions);
+  } else {
+    logger.info('Bot running in webhook mode...');
+    await bot.api.setWebhook(appConfig.WEBHOOK_URL!, {
+      allowed_updates: allowedUpdates,
+      secret_token: appConfig.WEBHOOK_SECRET,
+    });
+  }
 }
 
 main()
@@ -15,7 +39,20 @@ main()
     await prisma.$disconnect();
   })
   .catch(async (e) => {
-    console.error(e);
+    logger.error(e);
     await prisma.$disconnect();
     process.exit(1);
   });
+
+function onShutdown(cleanUp: () => Promise<void>) {
+  let isShuttingDown = false;
+  const handleShutdown = async () => {
+    if (isShuttingDown) {
+      return;
+    }
+    isShuttingDown = true;
+    await cleanUp();
+  };
+  process.on('SIGINT', handleShutdown);
+  process.on('SIGTERM', handleShutdown);
+}

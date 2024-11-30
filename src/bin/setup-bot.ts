@@ -2,8 +2,8 @@
  * Utility script to perform the bot setup, run with --help for usage
  */
 import { Option, program } from 'commander';
-import { bot } from '../bot';
 import {
+  appConfig,
   botProperties,
   channelDefaultAdministratorRights,
   groupDefaultAdministratorRights,
@@ -11,9 +11,10 @@ import {
   setupGuideManualSteps,
   worksInChannels,
   worksInGroups,
-} from '../config';
-import { i18n } from '../i18n';
+} from '../config.js';
+import { i18n } from '../i18n.js';
 import { LanguageCode } from 'grammy/types';
+import { Api } from 'grammy';
 
 const availableLocales: {
   locale: string;
@@ -68,9 +69,11 @@ const options: {
   lang?: string;
 } = program.opts();
 
+const api = new Api(appConfig.BOT_TOKEN);
+
 async function setMyName() {
   for (const locale of localesToUpdate) {
-    await bot.api.setMyName(i18n.translate(locale.locale, 'bot-name'), {
+    await api.setMyName(i18n.translate(locale.locale, 'bot-name'), {
       language_code: locale.languageCode,
     });
 
@@ -90,7 +93,7 @@ async function setMyCommands() {
   for (const locale of localesToUpdate) {
     for (const key in commandsByScope) {
       const scope = JSON.parse(key);
-      await bot.api.setMyCommands(
+      await api.setMyCommands(
         commandsByScope[key].map((command) => ({
           command,
           description: i18n.t(locale.locale, `cmd-description-${command}`),
@@ -105,7 +108,7 @@ async function setMyCommands() {
 
 async function setMyDescription() {
   for (const locale of localesToUpdate) {
-    await bot.api.setMyDescription(i18n.t(locale.locale, 'bot-description'), {
+    await api.setMyDescription(i18n.t(locale.locale, 'bot-description'), {
       language_code: locale.languageCode,
     });
 
@@ -115,7 +118,7 @@ async function setMyDescription() {
 
 async function setMyShortDescription() {
   for (const locale of localesToUpdate) {
-    await bot.api.setMyShortDescription(
+    await api.setMyShortDescription(
       i18n.t(locale.locale, 'bot-short-description'),
       { language_code: locale.languageCode }
     );
@@ -129,7 +132,7 @@ async function setMyDefaultChannelAdministratorRights() {
     ? channelDefaultAdministratorRights
     : undefined;
 
-  await bot.api.setMyDefaultAdministratorRights({
+  await api.setMyDefaultAdministratorRights({
     for_channels: true,
     rights,
   });
@@ -140,7 +143,7 @@ async function setMyDefaultChannelAdministratorRights() {
 async function setMyDefaultGroupAdministratorRights() {
   const rights = worksInGroups ? groupDefaultAdministratorRights : undefined;
 
-  await bot.api.setMyDefaultAdministratorRights({
+  await api.setMyDefaultAdministratorRights({
     for_channels: false,
     rights,
   });
@@ -164,7 +167,7 @@ function furtherSetup() {
 
 async function checkBotProperties() {
   console.log('Checking bot properties...');
-  const me = await bot.api.getMe();
+  const me = await api.getMe();
 
   let fail = false;
 

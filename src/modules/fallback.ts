@@ -1,5 +1,5 @@
 import { Composer } from 'grammy';
-import { MyContext } from '../types/grammy';
+import { MyContext } from '../context.js';
 
 export const fallbackModule = new Composer<MyContext>();
 const _fallbackModule = fallbackModule.chatType('private');

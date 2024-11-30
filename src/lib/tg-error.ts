@@ -1,5 +1,6 @@
 import { I18nFlavor, TranslationVariables } from '@grammyjs/i18n';
 import { Context } from 'grammy';
+import { LoggerFlavor } from '../logger.js';
 
 /**
  * An error to be displayed to the user
@@ -17,7 +18,7 @@ export class TgError extends Error {
 }
 
 export async function defaultTgErrorHandler(
-  ctx: Context & I18nFlavor,
+  ctx: Context & I18nFlavor & LoggerFlavor,
   error: TgError
 ) {
   const prettyError = ctx.t(error.message, error.variables);
@@ -28,9 +29,9 @@ export async function defaultTgErrorHandler(
     } else if (ctx.chat?.type === 'private') {
       await ctx.reply(prettyError);
     } else {
-      console.error('handleTgError used but nowhere to show the error', ctx);
+      ctx.logger.error(ctx, 'handleTgError used but nowhere to show the error');
     }
   } catch (error) {
-    console.error('error while showing error', error);
+    ctx.logger.error(error, 'error while showing error');
   }
 }
