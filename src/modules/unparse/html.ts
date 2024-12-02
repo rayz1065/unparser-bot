@@ -20,7 +20,7 @@ const entityHtmlTags = {
   italic: ['<i>', '</i>'],
   custom_emoji: (entity) => [
     `<tg-emoji emoji-id="${entity.custom_emoji_id}">`,
-    `</tg-emoji`,
+    `</tg-emoji>`,
   ],
   expandable_blockquote: ['<blockquote expandable>', '</blockquote>'],
   mention: null,
