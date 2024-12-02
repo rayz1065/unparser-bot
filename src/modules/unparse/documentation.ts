@@ -44,7 +44,17 @@ const entities = {
     text: '$EUR',
     entities: [{ offset: 0, length: 4, type: 'cashtag' }],
   },
-  custom_emoji: parseMode.customEmoji('👍', '5368324170671202286' as any), // NOTE, workaround until new parse-mode release
+  custom_emoji: {
+    text: '👍',
+    entities: [
+      {
+        type: 'custom_emoji',
+        offset: 0,
+        length: 2,
+        custom_emoji_id: '5368324170671202286',
+      },
+    ],
+  }, // NOTE: encoded as url in parseMode
   email: {
     text: 'hello@example.com',
     entities: [{ offset: 0, length: 17, type: 'email' }],
@@ -74,11 +84,24 @@ const entities = {
   spoiler: parseMode.spoiler('spoiler'),
   strikethrough: parseMode.strikethrough('strikethrough'),
   text_link: parseMode.link('inline URL', 'http://www.example.com/'),
-  text_mention: (ctx) =>
-    parseMode.mentionUser(
-      'inline mention of a user',
-      ctx.from?.id ?? 123456789
-    ),
+  text_mention: (ctx) => {
+    const text = 'inline mention of a user';
+    if (ctx.from) {
+      return {
+        text,
+        entities: [
+          {
+            type: 'text_mention',
+            length: text.length,
+            offset: 0,
+            user: ctx.from,
+          },
+        ],
+      };
+    }
+    // NOTE: encoded as url in parseMode
+    return parseMode.mentionUser('inline mention of a user', 123456789);
+  },
   underline: parseMode.underline('underline'),
   url: {
     text: 'https://example.com',
