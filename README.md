@@ -32,7 +32,7 @@ docker compose up
 You will need to do a one-time setup of the bot, to get the exact list of steps run:
 
 ```sh
-docker compose run --rm -it app npx ts-node src/bin/setup-bot.ts --all
+docker compose run --rm -it app npx tsx src/bin/setup-bot.ts --all
 ```
 
 You can use that utility script to update most configurations automatically for you, the rest will need to be changed through BotFather.

@@ -13,7 +13,7 @@ import {
   worksInGroups,
 } from '../config.js';
 import { i18n } from '../i18n.js';
-import { LanguageCode } from 'grammy/types';
+import { BotCommandScope, LanguageCode } from 'grammy/types';
 import { Api } from 'grammy';
 
 const availableLocales: {
@@ -92,7 +92,7 @@ async function setMyCommands() {
 
   for (const locale of localesToUpdate) {
     for (const key in commandsByScope) {
-      const scope = JSON.parse(key);
+      const scope = JSON.parse(key) as BotCommandScope;
       await api.setMyCommands(
         commandsByScope[key].map((command) => ({
           command,

@@ -5,37 +5,38 @@
   "scripts": {
     "start": "tsc-watch --onSuccess \"tsx ./src/bin/run.ts\"",
     "build": "npx tsc",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
     "@grammyjs/conversations": "^1.2.0",
-    "@grammyjs/i18n": "^1.0.2",
-    "@grammyjs/parse-mode": "^1.10.0",
+    "@grammyjs/i18n": "^1.1.2",
+    "@grammyjs/parse-mode": "^1.11.1",
     "@grammyjs/storage-prisma": "^2.4.2",
     "@hono/node-server": "^1.12.0",
-    "@prisma/client": "^5.16.2",
+    "@prisma/client": "^6.2.1",
     "base-x": "^4.0.0",
     "commander": "^12.1.0",
-    "dayjs": "^1.11.11",
-    "grammy": "^1.27.0",
-    "grammy-edit-or-reply": "^1.1.1",
+    "dayjs": "^1.11.12",
+    "grammy": "^1.34.0",
+    "grammy-edit-or-reply": "^1.2.0",
     "grammy-tg-components": "^0.0.2",
-    "hono": "^4.5.2",
+    "hono": "^4.5.3",
+    "nodemon": "^3.1.4",
     "pino": "^9.3.2",
     "pino-pretty": "^11.2.2",
     "tsx": "^4.19.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.14.10",
+    "@types/node": "^22.10.10",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
     "@typescript-eslint/parser": "^7.16.1",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "prisma": "^5.16.2",
-    "tsc-watch": "^6.2.0",
-    "typescript": "^5.5.3"
+    "prisma": "^6.2.1",
+    "tsc-watch": "^6.2.1",
+    "typescript": "^5.5.4"
   }
 }

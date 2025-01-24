@@ -30,7 +30,7 @@ export function startServer({ bot, logger }: Dependencies) {
     app.post('/webhook', async (c) => {
       try {
         await c.req.json();
-      } catch (error) {
+      } catch {
         return c.json({ ok: false, error: 'Invalid body' }, 400);
       }
       return await webhookCallback(bot, 'hono', {
