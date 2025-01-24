@@ -13,6 +13,7 @@ import { tgComponentsMiddleware } from 'grammy-tg-components';
 import { mainMenuModule } from './modules/main-menu.js';
 import { appConfig } from './config.js';
 import { logger } from './logger.js';
+import { autoAnswerCallbacks } from './lib/auto-answer-callbacks.js';
 
 export function buildBot() {
   const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {
@@ -59,6 +60,7 @@ export function buildBot() {
     })
   );
   protectedBot.use(editOrReplyMiddleware());
+  protectedBot.use(autoAnswerCallbacks());
 
   // modules
   protectedBot.use(mainMenuModule);
