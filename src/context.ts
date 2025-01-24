@@ -10,6 +10,7 @@ import { StoredChatFlavor } from './middlewares/store-telegram-chat.js';
 import { AuthenticatedFlavor } from './middlewares/authenticate.js';
 import { Logger, LoggerFlavor } from './logger.js';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface SessionData {
   // field?: string;
 }

@@ -61,7 +61,7 @@ export async function upsertTelegramChat(chat: Chat) {
       data: updateData,
       include: telegramChatInclude,
     });
-  } catch (error) {
+  } catch {
     dbChat = await prisma.telegramChat.create({
       data: {
         ...updateData,
