@@ -53,6 +53,10 @@ function onShutdown(cleanUp: () => Promise<void>) {
     isShuttingDown = true;
     await cleanUp();
   };
-  process.on('SIGINT', handleShutdown);
-  process.on('SIGTERM', handleShutdown);
+  process.on('SIGINT', () => {
+    void handleShutdown();
+  });
+  process.on('SIGTERM', () => {
+    void handleShutdown();
+  });
 }

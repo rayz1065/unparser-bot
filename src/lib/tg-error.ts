@@ -10,7 +10,7 @@ export class TgError extends Error {
 
   public constructor(
     message: string,
-    variables?: TranslationVariables | undefined
+    variables?: TranslationVariables
   ) {
     super(message);
     this.variables = variables;

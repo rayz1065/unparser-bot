@@ -110,9 +110,9 @@ export const allowedUpdates: PollingOptions['allowed_updates'] = [
   // 'removed_chat_boost',
   //
   // not received by default
-  // "message_reaction",
-  // "message_reaction_count",
-  // "chat_member",
+  // 'message_reaction',
+  // 'message_reaction_count',
+  // 'chat_member',
 ];
 
 export const pollingOptions: PollingOptions = {
@@ -155,7 +155,6 @@ function getAppConfig(env: NodeJS.ProcessEnv) {
         z.array(z.number())
       ),
       DEFAULT_LOCALE: z.enum(supportedLocales).default('en'),
-      BOT_TOKEN_ENCRYPTION_SECRET: z.string(),
       USE_WEBHOOK: z
         .preprocess((x) => x === 'true', z.boolean())
         .default(false),

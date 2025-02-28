@@ -1,4 +1,4 @@
-FROM node:20 AS dev
+FROM node:22 AS dev
 
 ENV NODE_ENV=development
 ENV PATH=/app/node_modules/.bin:$PATH

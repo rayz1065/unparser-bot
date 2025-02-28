@@ -11,6 +11,7 @@ import { AuthenticatedFlavor } from './middlewares/authenticate.js';
 import { Logger, LoggerFlavor } from './logger.js';
 import { SplitAndReplyFlavor } from './lib/split-and-reply.js';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface SessionData {
   // field?: string;
 }

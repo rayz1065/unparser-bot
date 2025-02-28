@@ -25,6 +25,7 @@ import { splitAndReply } from './lib/split-and-reply.js';
 import { inlineModule } from './modules/inline.js';
 import { unparserInlineModule } from './modules/unparse/inline.js';
 import { documentationModule } from './modules/unparse/documentation.js';
+import { autoAnswerCallbacks } from './lib/auto-answer-callbacks.js';
 
 export function buildBot() {
   const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {
@@ -72,6 +73,7 @@ export function buildBot() {
     })
   );
   protectedBot.use(editOrReplyMiddleware());
+  protectedBot.use(autoAnswerCallbacks());
 
   // modules
   protectedBot.use(documentationModule);
