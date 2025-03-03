@@ -251,10 +251,10 @@
   resolved "https://registry.yarnpkg.com/@grammyjs/storage-prisma/-/storage-prisma-2.4.2.tgz#3cae7ced872da24ba3350181d3393de75879c461"
   integrity sha512-//NiwgiKiBHkz5+nBMBFarCpqWXaXmuCGqHYsnCXAjGecVB81Nb43NgA2CKSUaWn4hrLBnnLMaitwDci6EZc3g==
 
-"@grammyjs/types@3.18.0":
-  version "3.18.0"
-  resolved "https://registry.yarnpkg.com/@grammyjs/types/-/types-3.18.0.tgz#2f6f474e29e0a1a96883fb93e6d97a8e77f45bde"
-  integrity sha512-/VpQcT6Z0+Lw6H6jv2JvnDmqB1/9rjbFdDBlPBPUW3kQ1bWfjzfaiVk2+J2eiid3o3sLaPp3ZK0XjEI1gWNc3g==
+"@grammyjs/types@3.19.0":
+  version "3.19.0"
+  resolved "https://registry.yarnpkg.com/@grammyjs/types/-/types-3.19.0.tgz#7435f34ca607649b98a6d8c76f364b2067da6293"
+  integrity sha512-N0MS+RJG+AGSNuka1GWVj88oyK1oti4I0eQq6jGo4hic3P9MwFfnHjGQuIExZ3tlJUrZYwC/T7gk4Tu3+guJyg==
 
 "@hono/node-server@^1.12.0":
   version "1.13.7"
@@ -936,12 +936,12 @@ grammy-tg-components@^0.0.2:
   dependencies:
     dayjs "^1.11.11"
 
-grammy@^1.34.0:
-  version "1.34.0"
-  resolved "https://registry.yarnpkg.com/grammy/-/grammy-1.34.0.tgz#a826feb5e91f88041a9c91b7f60fff2523176c3f"
-  integrity sha512-YSLUSLdwycufB0Si9em+Ef3aXt7Vq0LYuGgwF4+ZskPb6+3RzrPdkh28qQNKhCeIXKodgMKQ5CxAHf/fLJZufg==
+grammy@^1.35.0:
+  version "1.35.0"
+  resolved "https://registry.yarnpkg.com/grammy/-/grammy-1.35.0.tgz#d418e14bdc612b6897259d5793e7d8cfcbac0ff3"
+  integrity sha512-Qlu5kVaekL4w5clWSpQcRxwJJoEeU13g8DTALuNbZsDAJuFJNXBuI8EqR6U1m1of7j9NEMQz59sXu+0/KsKjyg==
   dependencies:
-    "@grammyjs/types" "3.18.0"
+    "@grammyjs/types" "3.19.0"
     abort-controller "^3.0.0"
     debug "^4.3.4"
     node-fetch "^2.7.0"
