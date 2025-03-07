@@ -14,6 +14,7 @@ import { mainMenuModule } from './modules/main-menu.js';
 import { appConfig } from './config.js';
 import { logger } from './logger.js';
 import { autoAnswerCallbacks } from './lib/auto-answer-callbacks.js';
+import { ignoreNotModified } from './lib/ignore-not-modified.js';
 
 export function buildBot() {
   const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {
@@ -23,12 +24,9 @@ export function buildBot() {
     }),
   });
   bot.api.config.use(parseMode('HTML'));
+  bot.api.config.use(ignoreNotModified());
 
   const protectedBot = bot.errorBoundary((error) => {
-    if (error.message.indexOf('message is not modified:') !== -1) {
-      return;
-    }
-
     error.ctx.logger.error(
       {
         error: error.error,
