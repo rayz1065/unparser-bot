@@ -18,6 +18,7 @@ export const i18n = new I18n<MyContext>({
   globalTranslationContext(ctx) {
     return {
       'user-name': escapeHtml(ctx.from?.first_name ?? ''),
+      'bot-username': ctx.me.username,
     };
   },
 });

@@ -15,6 +15,8 @@ import { appConfig } from './config.js';
 import { logger } from './logger.js';
 import { autoAnswerCallbacks } from './lib/auto-answer-callbacks.js';
 import { ignoreNotModified } from './lib/ignore-not-modified.js';
+import { settingsModule } from './modules/settings.js';
+import { fallbackModule } from './modules/fallback.js';
 
 export function buildBot() {
   const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {
@@ -62,6 +64,8 @@ export function buildBot() {
 
   // modules
   protectedBot.use(mainMenuModule);
+  protectedBot.use(settingsModule);
+  protectedBot.use(fallbackModule);
 
   // unexpected unhandled callback data
   protectedBot.on('callback_query:data', async (ctx, next) => {
