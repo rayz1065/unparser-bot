@@ -3,28 +3,39 @@ import { hydrateReply, parseMode } from '@grammyjs/parse-mode';
 import { conversations } from '@grammyjs/conversations';
 import { authenticate } from './middlewares/authenticate.js';
 import { PrismaAdapter } from '@grammyjs/storage-prisma';
-import { prisma } from './prisma.js';
-import { i18n } from './i18n.js';
 import { storeTelegramChat } from './middlewares/store-telegram-chat.js';
-import { createContextConstructor, MyContext } from './context.js';
+import { MyContext } from './context.js';
 import { editOrReplyMiddleware } from 'grammy-edit-or-reply';
 import { TgError, defaultTgErrorHandler } from './lib/tg-error.js';
 import { tgComponentsMiddleware } from 'grammy-tg-components';
 import { mainMenuModule } from './modules/main-menu.js';
-import { appConfig } from './config.js';
-import { logger } from './logger.js';
+import { installConfig, AppConfig } from './config.js';
+import { installLogger, Logger } from './logger.js';
 import { autoAnswerCallbacks } from './lib/auto-answer-callbacks.js';
 import { ignoreNotModified } from './lib/ignore-not-modified.js';
 import { settingsModule } from './modules/settings.js';
 import { fallbackModule } from './modules/fallback.js';
+import { I18n } from '@grammyjs/i18n';
+import { PrismaClient } from '@prisma/client';
 
-export function buildBot() {
-  const bot = new Bot<MyContext>(appConfig.BOT_TOKEN, {
-    ContextConstructor: createContextConstructor({
-      config: appConfig,
-      logger,
-    }),
+interface Dependencies {
+  logger: Logger;
+  config: AppConfig;
+  i18n: I18n<MyContext>;
+  prisma: PrismaClient;
+}
+
+export function buildBot({ logger, config, i18n, prisma }: Dependencies) {
+  const bot = new Bot<MyContext>(config.BOT_TOKEN);
+
+  bot.use(installLogger(logger));
+  bot.use(installConfig(config));
+
+  bot.use((ctx, next) => {
+    console.log(ctx);
+    return next();
   });
+
   bot.api.config.use(parseMode('HTML'));
   bot.api.config.use(ignoreNotModified());
 
@@ -66,12 +77,6 @@ export function buildBot() {
   protectedBot.use(mainMenuModule);
   protectedBot.use(settingsModule);
   protectedBot.use(fallbackModule);
-
-  // unexpected unhandled callback data
-  protectedBot.on('callback_query:data', async (ctx, next) => {
-    ctx.logger.warn({ data: ctx.callbackQuery.data }, 'No match for data');
-    await next();
-  });
 
   return bot;
 }

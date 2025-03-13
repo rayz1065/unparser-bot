@@ -1,4 +1,4 @@
-import { PollingOptions } from 'grammy';
+import { Context, MiddlewareFn, PollingOptions } from 'grammy';
 import {
   BotCommandScope,
   ChatAdministratorRights,
@@ -159,3 +159,14 @@ function getAppConfig(env: NodeJS.ProcessEnv) {
 export type AppConfig = ReturnType<typeof getAppConfig>;
 export type AppConfigFlavor = { config: AppConfig };
 export const appConfig = getAppConfig(process.env);
+
+export function installConfig<C extends Context>(
+  config: AppConfig
+): MiddlewareFn<C & AppConfigFlavor> {
+  return (ctx, next) => {
+    Object.defineProperty(ctx, 'config', {
+      value: config,
+    });
+    return next();
+  };
+}
