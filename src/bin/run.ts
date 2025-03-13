@@ -1,37 +1,23 @@
-import { allowedUpdates, appConfig, pollingOptions } from '../config.js';
+import { pollingOptions } from '../config.js';
 import { prisma } from '../prisma.js';
 import { buildBot } from '../main.js';
 import '../dayjs.js';
-import { startServer } from '../server/index.js';
 import { logger } from '../logger.js';
 
 async function main() {
   const bot = buildBot();
 
-  const { server } = startServer({ bot, logger });
-
   onShutdown(async () => {
     logger.info('Shutting down');
 
-    await Promise.all([
-      server.close(),
-      ...[!appConfig.USE_WEBHOOK ? [bot.stop()] : []],
-    ]);
+    await bot.stop();
 
     await prisma.$disconnect();
     process.exit(0);
   });
 
-  if (!appConfig.USE_WEBHOOK) {
-    logger.info('Bot running in polling mode...');
-    await bot.start(pollingOptions);
-  } else {
-    logger.info('Bot running in webhook mode...');
-    await bot.api.setWebhook(appConfig.WEBHOOK_URL!, {
-      allowed_updates: allowedUpdates,
-      secret_token: appConfig.WEBHOOK_SECRET,
-    });
-  }
+  logger.info('Bot running in polling mode...');
+  await bot.start(pollingOptions);
 }
 
 main()

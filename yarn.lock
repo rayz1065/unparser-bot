@@ -256,11 +256,6 @@
   resolved "https://registry.yarnpkg.com/@grammyjs/types/-/types-3.19.0.tgz#7435f34ca607649b98a6d8c76f364b2067da6293"
   integrity sha512-N0MS+RJG+AGSNuka1GWVj88oyK1oti4I0eQq6jGo4hic3P9MwFfnHjGQuIExZ3tlJUrZYwC/T7gk4Tu3+guJyg==
 
-"@hono/node-server@^1.12.0":
-  version "1.13.7"
-  resolved "https://registry.yarnpkg.com/@hono/node-server/-/node-server-1.13.7.tgz#af95cf97bd24ddffc97e72851738cbde0a98c791"
-  integrity sha512-kTfUMsoloVKtRA2fLiGSd9qBddmru9KadNyhJCwgKBxTiNkaAJEwkVN9KV/rS4HtmmNRtUh6P+YpmjRMl0d9vQ==
-
 "@humanfs/core@^0.19.1":
   version "0.19.1"
   resolved "https://registry.yarnpkg.com/@humanfs/core/-/core-0.19.1.tgz#17c55ca7d426733fe3c561906b8173c336b40a77"
@@ -965,11 +960,6 @@ help-me@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/help-me/-/help-me-5.0.0.tgz#b1ebe63b967b74060027c2ac61f9be12d354a6f6"
   integrity sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==
-
-hono@^4.5.3:
-  version "4.6.18"
-  resolved "https://registry.yarnpkg.com/hono/-/hono-4.6.18.tgz#18fdc3cfe1540c5aa286a94b2ed5a66fce87241b"
-  integrity sha512-Fu7hEPvdwtPG8LqSAiPn8p8HjD+PDxrP/HVnwRBnwtVKOn5zDDKsw0ma2Xt58oq97Rlp3t/mRNADEV/Ym6cDng==
 
 ieee754@^1.2.1:
   version "1.2.1"
