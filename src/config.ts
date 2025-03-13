@@ -143,7 +143,6 @@ function getAppConfig(env: NodeJS.ProcessEnv) {
         z.array(z.number())
       ),
       DEFAULT_LOCALE: z.enum(supportedLocales).default('en'),
-      API_ROOT_URL: z.string(),
       NODE_ENV: z.enum(['development', 'production']).default('development'),
       LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
     })
