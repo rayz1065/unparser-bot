@@ -31,11 +31,6 @@ export function buildBot({ logger, config, i18n, prisma }: Dependencies) {
   bot.use(installLogger(logger));
   bot.use(installConfig(config));
 
-  bot.use((ctx, next) => {
-    console.log(ctx);
-    return next();
-  });
-
   bot.api.config.use(parseMode('HTML'));
   bot.api.config.use(ignoreNotModified());
 
