@@ -1,6 +1,6 @@
 import { Composer, GrammyError } from 'grammy';
 import { MyContext } from '../../context.js';
-import { escapeHtml, escapeMd, escapeMdPre } from '../../lib/utils.js';
+import { escapeHtml, escapeMd } from '../../lib/utils.js';
 import { fmt, pre } from '@grammyjs/parse-mode';
 import { replaceMentions, getMessageToUnparse } from './unparse-util.js';
 import { toMarkdown } from '../../lib/unparse.js';
@@ -50,7 +50,7 @@ _unparseMdModule.command('pmd', async (ctx) => {
 
 unparseMdModule.chosenInlineResult('pmd', async (ctx) => {
   const query = ctx.chosenInlineResult.query;
-  const escapedQuery = escapeMdPre(query);
+  const escapedQuery = escapeMd(query);
   const prettySource =
     `👇 *${ctx.t('inline-result-source')}*\n` +
     `\`\`\`Markdown\n${escapedQuery}\`\`\``;

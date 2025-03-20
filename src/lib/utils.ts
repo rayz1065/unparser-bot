@@ -30,22 +30,6 @@ export function escapeHtml(text: string) {
 }
 
 /**
- * Inside the (...) part of the inline link and custom emoji definition, all
- * ')' and '\\' must be escaped with a preceding '\\' character.
- */
-export function escapeMdUrl(text: string) {
-  return text.replace(/[)\\]/g, (match) => '\\' + match);
-}
-
-/**
- * Inside pre and code entities, all '`' and '\\' characters must be escaped
- * with a preceding '\\' character.
- */
-export function escapeMdPre(text: string) {
-  return text.replace(/[`\\]/g, (match) => '\\' + match);
-}
-
-/**
  * In all other places characters '_', '*', '[', ']', '(', ')', '~', '`', '>',
  * '#', '+', '-', '=', '|', '{', '}', '.', '!' must be escaped with the
  * preceding character '\\'.
