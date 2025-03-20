@@ -1,11 +1,10 @@
 import { Composer, GrammyError } from 'grammy';
 import { MyContext } from '../../context.js';
-import { unparseMd } from './md.js';
 import { fmt, pre } from '@grammyjs/parse-mode';
-import { unparseHtml } from './html.js';
 import { Message } from 'grammy/types';
-import { replaceMentions } from './replace-mentions.js';
+import { replaceMentions } from './unparse-util.js';
 import { escapeHtml } from '../../lib/utils.js';
+import { toHtml, toMarkdown } from '../../lib/unparse.js';
 
 export const unparseTranspileModule = new Composer<MyContext>();
 const _unparseTranspileModule = unparseTranspileModule.chatType([
@@ -44,8 +43,8 @@ _unparseTranspileModule.command('mdhtml', async (ctx) => {
   const messageId = sentMessage.message_id;
   ctx.api.deleteMessage(ctx.chatId, messageId).catch(() => {});
 
-  const result = unparseHtml(sentMessage);
-  const prettyRes = fmt`${pre(result.join(''), 'HTML')}`;
+  const result = toHtml(sentMessage);
+  const prettyRes = fmt`${pre(result, 'HTML')}`;
   await ctx.splitAndReply(prettyRes.text, { entities: prettyRes.entities });
 });
 
@@ -79,7 +78,7 @@ _unparseTranspileModule.command('htmlmd', async (ctx) => {
   const messageId = sentMessage.message_id;
   ctx.api.deleteMessage(ctx.chatId, messageId).catch(() => {});
 
-  const result = unparseMd(sentMessage);
-  const prettyRes = fmt`${pre(result.join(''), 'Markdown')}`;
+  const result = toMarkdown(sentMessage);
+  const prettyRes = fmt`${pre(result, 'Markdown')}`;
   await ctx.splitAndReply(prettyRes.text, { entities: prettyRes.entities });
 });

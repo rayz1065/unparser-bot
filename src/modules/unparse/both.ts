@@ -1,9 +1,8 @@
 import { Composer } from 'grammy';
 import { MyContext } from '../../context.js';
-import { getMessageToUnparse } from './unparse.js';
-import { unparseMd } from './md.js';
 import { fmt, pre } from '@grammyjs/parse-mode';
-import { unparseHtml } from './html.js';
+import { getMessageToUnparse } from './unparse-util.js';
+import { toHtml, toMarkdown } from '../../lib/unparse.js';
 
 export const unparseBothModule = new Composer<MyContext>();
 const _unparseBothModule = unparseBothModule.chatType([
@@ -19,8 +18,8 @@ _unparseBothModule.command('both', async (ctx) => {
 
   const toUnparse = getMessageToUnparse(ctx);
 
-  const htmlResult = unparseHtml(toUnparse);
-  const mdResult = unparseMd(toUnparse);
-  const prettyRes = fmt`${pre(htmlResult.join(''), 'HTML')} ${pre(mdResult.join(''), 'Markdown')}`;
+  const htmlResult = toHtml(toUnparse);
+  const mdResult = toMarkdown(toUnparse);
+  const prettyRes = fmt`${pre(htmlResult, 'HTML')} ${pre(mdResult, 'Markdown')}`;
   await ctx.splitAndReply(prettyRes.text, { entities: prettyRes.entities });
 });

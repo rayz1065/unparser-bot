@@ -9,11 +9,9 @@ import { editOrReplyMiddleware } from 'grammy-edit-or-reply';
 import { TgError, defaultTgErrorHandler } from './lib/tg-error.js';
 import { tgComponentsMiddleware } from 'grammy-tg-components';
 import { mainMenuModule } from './modules/main-menu.js';
-import {
-  unparseBothModule,
-  unparseHtmlModule,
-  unparseMdModule,
-} from './modules/unparse/index.js';
+import { unparseHtmlModule } from './modules/unparse/html.js';
+import { unparseMdModule } from './modules/unparse/md.js';
+import { unparseBothModule } from './modules/unparse/both.js';
 import { fallbackModule } from './modules/fallback.js';
 import { unparseTranspileModule } from './modules/unparse/transpile.js';
 import { unparseEntitiesModule } from './modules/unparse/entities.js';

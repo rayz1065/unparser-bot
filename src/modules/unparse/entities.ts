@@ -1,7 +1,7 @@
 import { Composer } from 'grammy';
 import { MyContext } from '../../context.js';
-import { getMessageToUnparse } from './unparse.js';
 import { fmt, pre } from '@grammyjs/parse-mode';
+import { getMessageToUnparse } from './unparse-util.js';
 
 export const unparseEntitiesModule = new Composer<MyContext>();
 const _unparseEntitiesModule = unparseEntitiesModule.chatType([

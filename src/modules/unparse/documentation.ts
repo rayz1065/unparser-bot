@@ -1,8 +1,6 @@
 import { Composer, InlineKeyboard } from 'grammy';
 import { MyContext } from '../../context.js';
 import { TgCallbacksBag } from 'grammy-tg-components';
-import { unparseHtml } from './html.js';
-import { unparseMd } from './md.js';
 import * as parseMode from '@grammyjs/parse-mode';
 import { MessageEntity } from 'grammy/types';
 import { MessageData } from 'grammy-edit-or-reply';
@@ -12,6 +10,7 @@ import {
   encodeDeepLinkUrl,
 } from '../../lib/deep-linking.js';
 import { menuCb } from '../main-menu.js';
+import { toHtml, toMarkdown } from '../../lib/unparse.js';
 
 export const documentationModule = new Composer<MyContext>();
 const _documentationModule = documentationModule.chatType([
@@ -164,7 +163,7 @@ function documentationMenu(
     textLines.push(
       `📖 ${ctx.t('documentation-info-about', { entityType: selectedEntityType })}`,
       '',
-      unparseHtml(textEntities).join(''),
+      toHtml(textEntities),
       ''
     );
 
@@ -172,11 +171,11 @@ function documentationMenu(
 
     textLines.push(
       `<pre><code class="language-html">${escapeHtml(
-        unparseHtml(textEntities).join('')
+        toHtml(textEntities)
       )}</code></pre>`
     );
 
-    const markdownText = unparseMd(textEntities).join('').replaceAll('**', '');
+    const markdownText = toMarkdown(textEntities).replaceAll('**', '');
 
     textLines.push(
       `<pre><code class="language-Markdown">${escapeHtml(

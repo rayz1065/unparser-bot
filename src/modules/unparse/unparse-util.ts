@@ -1,11 +1,7 @@
 import { MessageEntity } from 'grammy/types';
 import { MyContext } from '../../context.js';
 import { Filter } from 'grammy';
-
-type UnparsedMessage = (
-  | string
-  | { is_start: boolean; entity: MessageEntity }
-)[];
+import { User } from 'grammy/types';
 
 type TextEntities = {
   text: string;
@@ -14,41 +10,6 @@ type TextEntities = {
 type MakeRequired<T, K extends keyof T> = T & {
   [key in K]-?: T[key];
 };
-
-/**
- * Unparses a message and returns a list of tokens, which can be characters or
- * start/end entities.
- */
-export function unparse({ text, entities }: TextEntities): UnparsedMessage {
-  entities ??= [];
-  let entitiesIdx = 0;
-  const entitiesStack: MessageEntity[] = [];
-  const result: UnparsedMessage = [];
-
-  for (let i = 0; i < text.length; i++) {
-    while (
-      entitiesIdx < entities.length &&
-      entities[entitiesIdx].offset === i
-    ) {
-      const entity = entities[entitiesIdx];
-      result.push({ entity, is_start: true });
-      entitiesStack.push(entity);
-      entitiesIdx += 1;
-    }
-
-    result.push(text[i]);
-
-    while (
-      entitiesStack.length &&
-      entitiesStack.at(-1)!.length + entitiesStack.at(-1)!.offset === i + 1
-    ) {
-      result.push({ entity: entitiesStack.at(-1)!, is_start: false });
-      entitiesStack.pop();
-    }
-  }
-
-  return result;
-}
 
 /**
  * Picks the right message to unparse, removes irrelevant commands from the
@@ -95,4 +56,14 @@ export function getMessageToUnparse(
     text: messageText,
     entities,
   };
+}
+
+/**
+ * Replaces all the inline mentions present in the text with ones of the
+ * specified user.
+ */
+export function replaceMentions(user: User, text: string) {
+  return text.replace(/tg:\/\/user\?id=(\d+)/g, () => {
+    return `tg://user?id=${user.id}`;
+  });
 }
