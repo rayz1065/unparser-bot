@@ -14,3 +14,11 @@ _fallbackModule.on('message').filter(
     });
   }
 );
+
+_fallbackModule.on('callback_query', async (ctx) => {
+  ctx.logger.warn(ctx.callbackQuery, 'Unmatched callback query');
+  await ctx.answerCallbackQuery({
+    text: ctx.t('fallback-unknown-callback'),
+    show_alert: true,
+  });
+});

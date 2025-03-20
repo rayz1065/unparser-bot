@@ -7,7 +7,7 @@ import { appConfig } from '../config.js';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 // add any missing includes here
-const userInclude = {
+export const userInclude = {
   telegram_chat: true,
 } as const satisfies Prisma.UserInclude;
 

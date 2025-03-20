@@ -1,5 +1,6 @@
 -bot-creator = @rayz1065
 -source = github.com/rayz1065/unparser-bot
+-schwa = ə
 
 # base
 cancel = ❌ Cancel
@@ -25,6 +26,7 @@ bot-description =
     📦 Source: {-source}
 
 # commands
+
 cmd-description-start = Start the bot
 cmd-description-help = Get help for the bot
 cmd-description-html = Convert message to HTML
@@ -89,6 +91,8 @@ reply-to-unparse =
     Or to transpile it
     • 🌐 → ⬇️ /htmlmd
     • ⬇️ → 🌐 /mdhtml
+fallback-unknown-callback = This button doesn't seem to do anything...
+    Try restarting the bot
 
 # Inline mode
 inline-loading = Loading...
